@@ -28,11 +28,11 @@ import org.apache.shardingsphere.sql.parser.core.ParseASTNode;
  * SQL parser for hive.
  */
 public final class HiveParser extends HiveStatementParser implements SQLParser {
-    
+
     public HiveParser(final TokenStream input) {
         super(input);
     }
-    
+
     @Override
     public ASTNode parse() {
         return new ParseASTNode(execute(), (CommonTokenStream) getTokenStream());
