@@ -2,60 +2,15 @@
 
 **官方网站: https://shardingsphere.apache.org/**
 
-[![GitHub release](https://img.shields.io/github/release/apache/shardingsphere.svg)](https://github.com/apache/shardingsphere/releases)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=apache_shardingsphere&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=apache_shardingsphere)
-
-[![CI](https://github.com/apache/shardingsphere/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/shardingsphere/actions/workflows/ci.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=apache_shardingsphere&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=apache_shardingsphere)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=apache_shardingsphere&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=apache_shardingsphere)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=apache_shardingsphere&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=apache_shardingsphere)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=apache_shardingsphere&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=apache_shardingsphere)
-[![codecov](https://codecov.io/gh/apache/shardingsphere/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/shardingsphere)
-
-[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/5394/badge)](https://bestpractices.coreinfrastructure.org/projects/5394)
-
-[![Slack](https://img.shields.io/badge/%20Slack-ShardingSphere%20Channel-blueviolet)](https://join.slack.com/t/apacheshardingsphere/shared_invite/zt-sbdde7ie-SjDqo9~I4rYcR18bq0SYTg)
-[![Gitter](https://badges.gitter.im/shardingsphere/shardingsphere.svg)](https://gitter.im/shardingsphere/Lobby)
-
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/ShardingSphere.svg?style=social&label=Follow%20%40ShardingSphere)](https://twitter.com/ShardingSphere)
-
-<table style="width:100%">
-    <tr>
-        <th>
-            <a href="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map?activity=stars&repo_id=49876476" target="_blank" style="display: block" align="center">
-                <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=stars&repo_id=49876476&image_size=auto&color_scheme=dark" width="721" height="auto">
-                    <img alt="Star Geographical Distribution of apache/shardingsphere" src="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=stars&repo_id=49876476&image_size=auto&color_scheme=light" width="721" height="auto">
-                </picture>
-            </a>
-        </th>
-        <th>
-            <a href="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map?activity=pull-request-creators&repo_id=49876476" target="_blank" style="display: block" align="center">
-                <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=pull-request-creators&repo_id=49876476&image_size=auto&color_scheme=dark" width="721" height="auto">
-                    <img alt="Pull Request Creator Geographical Distribution of apache/shardingsphere" src="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=pull-request-creators&repo_id=49876476&image_size=auto&color_scheme=light" width="721" height="auto">
-                </picture>
-            </a>
-        </th>
-        <th>
-            <a href="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map?activity=issue-creators&repo_id=49876476" target="_blank" style="display: block" align="center">
-                <picture>
-                    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=issue-creators&repo_id=49876476&image_size=auto&color_scheme=dark" width="721" height="auto">
-                    <img alt="Issue Creator Geographical Distribution of apache/shardingsphere" src="https://next.ossinsight.io/widgets/official/analyze-repo-stars-map/thumbnail.png?activity=issue-creators&repo_id=49876476&image_size=auto&color_scheme=light" width="721" height="auto">
-                </picture>
-            </a>
-        </th>
-    </tr>
-</table>
-
 ### 概述
 
 <hr>
 基于ShardingSphere构建，主要目的如下:
 
-1-学习源代码
-2-按照自己的使用场景精简代码
-3-按照自己的习惯及场景补充新的功能
+- 1-学习源代码
+- 2-按照自己的使用场景精简代码
+- 3-按照自己的习惯及场景补充新的功能
+
 <hr>
 
 Apache ShardingSphere 产品定位为 `Database Plus`，旨在构建异构数据库上层的标准和生态。
@@ -69,7 +24,8 @@ Apache ShardingSphere 产品定位为 `Database Plus`，旨在构建异构数据
 
 ShardingSphere 已于 2020 年 4 月 16 日成为 [Apache 软件基金会](https://apache.org/index.html#projects-list)的顶级项目。
 
-迄今为止，已有超过 [10,000 个 GitHub 项目](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code)采用了 ShardingSphere。
+迄今为止，已有超过 [10,000 个 GitHub 项目](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code)
+采用了 ShardingSphere。
 
 ### 文档📜
 
@@ -79,44 +35,6 @@ ShardingSphere 已于 2020 年 4 月 16 日成为 [Apache 软件基金会](https
 [![CN doc](https://img.shields.io/badge/文档-中文版-blue.svg)](https://shardingsphere.apache.org/document/current/cn/overview/)
 
 更多信息请参考：[https://shardingsphere.apache.org/document/current/cn/overview/](https://shardingsphere.apache.org/document/current/cn/overview/)
-
-### 参与贡献🚀🧑💻
-
-<hr>
-
-搭建开发环境和贡献者指南，请参考：[https://shardingsphere.apache.org/community/cn/involved/](https://shardingsphere.apache.org/community/cn/involved/)
-
-### 团队成员
-
-<hr>
-
-我们真挚感谢[社区贡献者](https://shardingsphere.apache.org/community/cn/team)对 Apache ShardingSphere 的奉献。
-
-##
-
-### 社区和支持💝🖤
-
-<hr>
-
-:link: [Mailing List](https://shardingsphere.apache.org/community/cn/involved/subscribe/). 适合于 Apache 社区相关讨论和版本发布；
-
-:link: [GitHub Issues](https://github.com/apache/shardingsphere/issues). 适合于设计问题、缺陷报告或者开发相关；
-
-:link: [GitHub Discussions](https://github.com/apache/shardingsphere/discussions). 适合于技术问题咨询和新功能讨论；
-
-:link: [Slack channel](https://join.slack.com/t/apacheshardingsphere/shared_invite/zt-sbdde7ie-SjDqo9~I4rYcR18bq0SYTg). 适合于在线交流和线上会议；
-
-:link: [Twitter](https://twitter.com/ShardingSphere). 随时了解 Apache ShardingSphere 信息。
-
-##
-
-### 状态👀
-
-<hr>
-
-:white_check_mark: Version 5.5.1: 已发布 :tada:
-
-🔗 请访问 [发布说明](https://github.com/apache/shardingsphere/blob/master/RELEASE-NOTES.md) 获得更详细的信息.
 
 :soon: Version 5.5.2
 
@@ -173,7 +91,8 @@ ShardingSphere-JDBC 采用无中心化架构，与应用程序共享资源，适
 ShardingSphere-Proxy 提供静态入口以及异构语言的支持，独立于应用程序部署，适用于 OLAP 应用以及对分片数据库进行管理和运维的场景。
 
 Apache ShardingSphere 是多接入端共同组成的生态圈。
-通过混合使用 ShardingSphere-JDBC 和 ShardingSphere-Proxy，并采用同一注册中心统一配置分片策略，能够灵活的搭建适用于各种场景的应用系统，使得架构师更加自由地调整适合于当前业务的最佳系统架构。
+通过混合使用 ShardingSphere-JDBC 和
+ShardingSphere-Proxy，并采用同一注册中心统一配置分片策略，能够灵活的搭建适用于各种场景的应用系统，使得架构师更加自由地调整适合于当前业务的最佳系统架构。
 
 :link: 更多信息请参考[官方网站](https://shardingsphere.apache.org/document/current/en/overview/#hybrid-architecture)。
 
@@ -206,18 +125,5 @@ Apache ShardingSphere 是多接入端共同组成的生态圈。
 <hr>
 
 查看 [Wiki](https://github.com/apache/shardingsphere/wiki) 详细了解如何构建 Apache ShardingSphere。
-
-##
-
-### 全景图
-
-<hr>
-
-<p align="center">
-<br/><br/>
-<img src="https://landscape.cncf.io/images/cncf-landscape-horizontal-color.svg" width="165"/>&nbsp;&nbsp;<img src="https://www.cncf.io/wp-content/uploads/2023/04/cncf-main-site-logo.svg" width="200"/>
-<br/><br/>
-ShardingSphere 进入了<a href="https://landscape.cncf.io/?category=app-definition-and-development&grouping=category">CNCF 云原生全景图</a>。
-</p>
 
 ##
