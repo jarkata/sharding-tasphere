@@ -50,6 +50,12 @@
 
 ### OVERVIEW
 
+基于ShardingSphere构建，主要目的如下:
+1-学习源代码
+2-按照自己的使用场景精简代码
+3-按照自己的习惯及场景补充新的功能
+
+
 <hr>
 
 Apache ShardingSphere is a distributed SQL transaction & query engine that allows for data sharding, scaling, encryption, and more - on any database. Our community's guiding development concept is Database Plus for creating a complete ecosystem that allows you to transform any database into a distributed database system. 
