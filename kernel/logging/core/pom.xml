@@ -21,14 +21,10 @@
     <parent>
         <groupId>org.apache.shardingsphere</groupId>
         <artifactId>shardingsphere-logging</artifactId>
-        <version>5.5.2-SNAPSHOT</version>
+        <version>5.5.1</version>
     </parent>
     <artifactId>shardingsphere-logging-core</artifactId>
     <name>${project.artifactId}</name>
-
-    <properties>
-        <java.version>8</java.version>
-    </properties>
     
     <dependencies>
         <dependency>

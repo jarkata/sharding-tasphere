@@ -19,12 +19,13 @@ package org.apache.shardingsphere.data.pipeline.core.metadata.loader;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.shardingsphere.data.pipeline.core.exception.job.TableNotFoundWhenSplitPipelineJobByRangeException;
 import org.apache.shardingsphere.data.pipeline.core.metadata.model.PipelineColumnMetaData;
 import org.apache.shardingsphere.data.pipeline.core.metadata.model.PipelineIndexMetaData;
 import org.apache.shardingsphere.data.pipeline.core.metadata.model.PipelineTableMetaData;
+import org.apache.shardingsphere.data.pipeline.core.exception.job.TableNotFoundWhenSplitPipelineJobByRangeException;
 import org.apache.shardingsphere.infra.exception.core.ShardingSpherePreconditions;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +55,11 @@ public final class PipelineTableMetaDataUtils {
         if (!primaryKeys.isEmpty()) {
             return primaryKeys.stream().map(tableMetaData::getColumnMetaData).collect(Collectors.toList());
         }
-        for (PipelineIndexMetaData each : tableMetaData.getUniqueIndexes()) {
+        Collection<PipelineIndexMetaData> uniqueIndexes = tableMetaData.getUniqueIndexes();
+        if (uniqueIndexes.isEmpty()) {
+            return new LinkedList<>();
+        }
+        for (PipelineIndexMetaData each : uniqueIndexes) {
             if (each.getColumns().stream().anyMatch(PipelineColumnMetaData::isNullable)) {
                 continue;
             }

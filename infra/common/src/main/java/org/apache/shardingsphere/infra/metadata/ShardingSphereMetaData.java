@@ -17,7 +17,7 @@
 
 package org.apache.shardingsphere.infra.metadata;
 
-import lombok.AccessLevel;
+import com.cedarsoftware.util.CaseInsensitiveMap;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
@@ -27,19 +27,16 @@ import org.apache.shardingsphere.infra.datasource.pool.destroyer.DataSourcePoolD
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.metadata.database.resource.ResourceMetaData;
 import org.apache.shardingsphere.infra.metadata.database.rule.RuleMetaData;
-import org.apache.shardingsphere.infra.metadata.identifier.ShardingSphereIdentifier;
 import org.apache.shardingsphere.infra.rule.ShardingSphereRule;
 import org.apache.shardingsphere.infra.rule.attribute.datasource.StaticDataSourceRuleAttribute;
 import org.apache.shardingsphere.infra.rule.scope.GlobalRule;
 import org.apache.shardingsphere.infra.rule.scope.GlobalRule.GlobalRuleChangedType;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * ShardingSphere meta data.
@@ -47,8 +44,7 @@ import java.util.stream.Collectors;
 @Getter
 public final class ShardingSphereMetaData {
     
-    @Getter(AccessLevel.NONE)
-    private final Map<ShardingSphereIdentifier, ShardingSphereDatabase> databases;
+    private final Map<String, ShardingSphereDatabase> databases;
     
     private final ResourceMetaData globalResourceMetaData;
     
@@ -59,25 +55,17 @@ public final class ShardingSphereMetaData {
     private final TemporaryConfigurationProperties temporaryProps;
     
     public ShardingSphereMetaData() {
-        this(Collections.emptyList(), new ResourceMetaData(Collections.emptyMap()), new RuleMetaData(Collections.emptyList()), new ConfigurationProperties(new Properties()));
+        this(new CaseInsensitiveMap<>(Collections.emptyMap(), new ConcurrentHashMap<>()),
+                new ResourceMetaData(Collections.emptyMap()), new RuleMetaData(Collections.emptyList()), new ConfigurationProperties(new Properties()));
     }
     
-    public ShardingSphereMetaData(final Collection<ShardingSphereDatabase> databases, final ResourceMetaData globalResourceMetaData,
+    public ShardingSphereMetaData(final Map<String, ShardingSphereDatabase> databases, final ResourceMetaData globalResourceMetaData,
                                   final RuleMetaData globalRuleMetaData, final ConfigurationProperties props) {
-        this.databases = new ConcurrentHashMap<>(databases.stream().collect(Collectors.toMap(each -> new ShardingSphereIdentifier(each.getName()), each -> each)));
+        this.databases = new CaseInsensitiveMap<>(databases, new ConcurrentHashMap<>());
         this.globalResourceMetaData = globalResourceMetaData;
         this.globalRuleMetaData = globalRuleMetaData;
         this.props = props;
         temporaryProps = new TemporaryConfigurationProperties(props.getProps());
-    }
-    
-    /**
-     * Get all databases.
-     *
-     * @return all databases
-     */
-    public Collection<ShardingSphereDatabase> getAllDatabases() {
-        return databases.values();
     }
     
     /**
@@ -87,7 +75,7 @@ public final class ShardingSphereMetaData {
      * @return contains database from meta data or not
      */
     public boolean containsDatabase(final String databaseName) {
-        return databases.containsKey(new ShardingSphereIdentifier(databaseName));
+        return databases.containsKey(databaseName);
     }
     
     /**
@@ -97,7 +85,7 @@ public final class ShardingSphereMetaData {
      * @return meta data database
      */
     public ShardingSphereDatabase getDatabase(final String databaseName) {
-        return databases.get(new ShardingSphereIdentifier(databaseName));
+        return databases.get(databaseName);
     }
     
     /**
@@ -109,17 +97,8 @@ public final class ShardingSphereMetaData {
      */
     public void addDatabase(final String databaseName, final DatabaseType protocolType, final ConfigurationProperties props) {
         ShardingSphereDatabase database = ShardingSphereDatabase.create(databaseName, protocolType, props);
-        databases.put(new ShardingSphereIdentifier(database.getName()), database);
-        globalRuleMetaData.getRules().forEach(each -> ((GlobalRule) each).refresh(databases.values(), GlobalRuleChangedType.DATABASE_CHANGED));
-    }
-    
-    /**
-     * Put database.
-     *
-     * @param database database
-     */
-    public void putDatabase(final ShardingSphereDatabase database) {
-        databases.put(new ShardingSphereIdentifier(database.getName()), database);
+        databases.put(database.getName(), database);
+        globalRuleMetaData.getRules().forEach(each -> ((GlobalRule) each).refresh(databases, GlobalRuleChangedType.DATABASE_CHANGED));
     }
     
     /**
@@ -128,12 +107,12 @@ public final class ShardingSphereMetaData {
      * @param databaseName database name
      */
     public void dropDatabase(final String databaseName) {
-        cleanResources(databases.remove(new ShardingSphereIdentifier(databaseName)));
+        cleanResources(databases.remove(databaseName));
     }
     
     @SneakyThrows(Exception.class)
     private void cleanResources(final ShardingSphereDatabase database) {
-        globalRuleMetaData.getRules().forEach(each -> ((GlobalRule) each).refresh(databases.values(), GlobalRuleChangedType.DATABASE_CHANGED));
+        globalRuleMetaData.getRules().forEach(each -> ((GlobalRule) each).refresh(databases, GlobalRuleChangedType.DATABASE_CHANGED));
         for (ShardingSphereRule each : database.getRuleMetaData().getRules()) {
             if (each instanceof AutoCloseable) {
                 ((AutoCloseable) each).close();

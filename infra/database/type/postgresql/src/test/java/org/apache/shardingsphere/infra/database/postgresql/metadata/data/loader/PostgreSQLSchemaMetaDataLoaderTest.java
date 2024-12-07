@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.infra.database.postgresql.metadata.data.loader;
 
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.metadata.data.loader.type.SchemaMetaDataLoader;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
@@ -76,7 +77,7 @@ class PostgreSQLSchemaMetaDataLoaderTest {
     
     @Test
     void assertLoadSchemaTableNames() throws SQLException {
-        assertThat(SchemaMetaDataLoader.loadSchemaTableNames("foo_db",
+        assertThat(SchemaMetaDataLoader.loadSchemaTableNames(DefaultDatabase.LOGIC_NAME,
                 TypedSPILoader.getService(DatabaseType.class, "PostgreSQL"), dataSource, Collections.emptyList()), is(createSchemaTableNames()));
     }
     

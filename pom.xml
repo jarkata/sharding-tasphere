@@ -25,7 +25,7 @@
     </parent>
     <groupId>org.apache.shardingsphere</groupId>
     <artifactId>shardingsphere</artifactId>
-    <version>5.5.2-SNAPSHOT</version>
+    <version>5.5.1</version>
     <packaging>pom</packaging>
     <name>Apache ShardingSphere</name>
     <description>Build criterion and ecosystem above multi-model databases</description>
@@ -53,7 +53,6 @@
         <java.version>1.8</java.version>
         <maven.version.range>[3.0.4,)</maven.version.range>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jacoco.skip>true</jacoco.skip>
         <maven.deploy.skip>false</maven.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <maven.enforcer.fail>true</maven.enforcer.fail>
@@ -96,7 +95,7 @@
         <narayana.version>5.12.7.Final</narayana.version>
         <jboss-transaction-spi.version>7.6.1.Final</jboss-transaction-spi.version>
         <jboss-logging.version>3.2.1.Final</jboss-logging.version>
-        <seata.version>2.2.0</seata.version>
+        <seata.version>2.1.0</seata.version>
         
         <netty.version>4.1.112.Final</netty.version>
         <bouncycastle.version>1.78.1</bouncycastle.version>
@@ -117,8 +116,7 @@
         <logback.version>1.2.13</logback.version>
         <commons-logging.version>1.2</commons-logging.version>
         
-        <lombok.version>1.18.36</lombok.version>
-        <immutables.version>2.9.3</immutables.version>
+        <lombok.version>1.18.34</lombok.version>
         
         <postgresql.version>42.7.2</postgresql.version>
         <mysql-connector-java.version>8.3.0</mysql-connector-java.version>
@@ -128,8 +126,7 @@
         <mariadb-java-client.version>2.4.2</mariadb-java-client.version>
         <clickhouse-jdbc.version>0.6.3</clickhouse-jdbc.version>
         <hive.version>4.0.1</hive.version>
-        <hive-server2-jdbc-driver-thin.version>1.6.0</hive-server2-jdbc-driver-thin.version>
-        <hadoop.version>3.3.6</hadoop.version>
+        <hive-server2-jdbc-driver-thin.version>1.5.0</hive-server2-jdbc-driver-thin.version>
         <presto.version>0.288.1</presto.version>
         
         <hikari-cp.version>4.0.3</hikari-cp.version>
@@ -144,7 +141,7 @@
         <hamcrest.version>3.0</hamcrest.version>
         <mockito.version>4.11.0</mockito.version>
         <awaitility.version>4.2.2</awaitility.version>
-        <testcontainers.version>1.20.3</testcontainers.version>
+        <testcontainers.version>1.20.1</testcontainers.version>
         <commons-csv.version>1.9.0</commons-csv.version>
         
         <graal-sdk.version>24.1.0</graal-sdk.version>
@@ -197,7 +194,6 @@
         <jdepend-maven-plugin.version>2.0</jdepend-maven-plugin.version>
         <taglist-maven-plugin.version>2.4</taglist-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
-        <dependency-check-maven.version>10.0.3</dependency-check-maven.version>
     </properties>
     
     <dependencyManagement>
@@ -586,6 +582,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+
         </dependency>
         
         <dependency>
@@ -696,19 +693,6 @@
                         <target>${java.version}</target>
                         <testSource>${java.version}</testSource>
                         <testTarget>${java.version}</testTarget>
-                        <compilerArgs>-Xlint:-options</compilerArgs>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                            <path>
-                                <groupId>org.immutables</groupId>
-                                <artifactId>value</artifactId>
-                                <version>${immutables.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
                 <!-- TODO nianjun should remove after test container is used in agent e2e -->
@@ -846,11 +830,6 @@
                         <aggregate>true</aggregate>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.owasp</groupId>
-                    <artifactId>dependency-check-maven</artifactId>
-                    <version>${dependency-check-maven.version}</version>
-                </plugin>
             </plugins>
         </pluginManagement>
         
@@ -889,6 +868,23 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>antlr</id>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                        <configuration>
+                            <libDirectory>src/main/antlr4/imports/${dialect.parser}/</libDirectory>
+                            <listener>false</listener>
+                            <visitor>true</visitor>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -998,7 +994,7 @@
         <connection>scm:git:https://github.com/apache/shardingsphere.git</connection>
         <developerConnection>scm:git:https://github.com/apache/shardingsphere.git</developerConnection>
         <url>https://github.com/apache/shardingsphere.git</url>
-        <tag>HEAD</tag>
+        <tag>5.5.1</tag>
     </scm>
     
     <distributionManagement>
@@ -1010,12 +1006,40 @@
     
     <profiles>
         <profile>
-            <id>jdk11+</id>
+            <id>jdk11-22</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>[11,23)</jdk>
             </activation>
             <properties>
                 <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/sun.net=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED</argLine>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <configuration>
+                                <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/sun.net=ALL-UNNAMED --add-opens java.base/java.net=ALL-UNNAMED</argLine>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>jdk23+</id>
+            <activation>
+                <jdk>[23,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.proc>full</maven.compiler.proc>
             </properties>
             <build>
                 <pluginManagement>
@@ -1051,48 +1075,48 @@
                                 </includes>
                             </configuration>
                         </plugin>
-<!--                        <plugin>-->
-<!--                            <groupId>org.graalvm.buildtools</groupId>-->
-<!--                            <artifactId>native-maven-plugin</artifactId>-->
-<!--                            <version>${native-maven-plugin.version}</version>-->
-<!--                            <extensions>true</extensions>-->
-<!--                            <configuration>-->
-<!--                                <agent>-->
-<!--                                    <enabled>true</enabled>-->
-<!--                                    <defaultMode>Conditional</defaultMode>-->
-<!--                                    <modes>-->
-<!--                                        <conditional>-->
-<!--                                            <userCodeFilterPath>${user.dir}/test/native/native-image-filter/user-code-filter.json</userCodeFilterPath>-->
-<!--                                            <extraFilterPath>${user.dir}/test/native/native-image-filter/extra-filter.json</extraFilterPath>-->
-<!--                                            <parallel>true</parallel>-->
-<!--                                        </conditional>-->
-<!--                                    </modes>-->
-<!--                                    <metadataCopy>-->
-<!--                                        <disabledStages>-->
-<!--                                            <stage>main</stage>-->
-<!--                                        </disabledStages>-->
-<!--                                        <merge>false</merge>-->
-<!--                                        <outputDirectory>${user.dir}/infra/reachability-metadata/src/main/resources/META-INF/native-image/org.apache.shardingsphere/generated-reachability-metadata/</outputDirectory>-->
-<!--                                    </metadataCopy>-->
-<!--                                </agent>-->
-<!--                            </configuration>-->
-<!--                            <executions>-->
-<!--                                <execution>-->
-<!--                                    <id>build-native</id>-->
-<!--                                    <goals>-->
-<!--                                        <goal>compile-no-fork</goal>-->
-<!--                                    </goals>-->
-<!--                                    <phase>package</phase>-->
-<!--                                </execution>-->
-<!--                                <execution>-->
-<!--                                    <id>test-native</id>-->
-<!--                                    <goals>-->
-<!--                                        <goal>test</goal>-->
-<!--                                    </goals>-->
-<!--                                    <phase>test</phase>-->
-<!--                                </execution>-->
-<!--                            </executions>-->
-<!--                        </plugin>-->
+                        <plugin>
+                            <groupId>org.graalvm.buildtools</groupId>
+                            <artifactId>native-maven-plugin</artifactId>
+                            <version>${native-maven-plugin.version}</version>
+                            <extensions>true</extensions>
+                            <configuration>
+                                <agent>
+                                    <enabled>true</enabled>
+                                    <defaultMode>Conditional</defaultMode>
+                                    <modes>
+                                        <conditional>
+                                            <userCodeFilterPath>${user.dir}/test/native/native-image-filter/user-code-filter.json</userCodeFilterPath>
+                                            <extraFilterPath>${user.dir}/test/native/native-image-filter/extra-filter.json</extraFilterPath>
+                                            <parallel>true</parallel>
+                                        </conditional>
+                                    </modes>
+                                    <metadataCopy>
+                                        <disabledStages>
+                                            <stage>main</stage>
+                                        </disabledStages>
+                                        <merge>false</merge>
+                                        <outputDirectory>${user.dir}/infra/reachability-metadata/src/main/resources/META-INF/native-image/org.apache.shardingsphere/generated-reachability-metadata/</outputDirectory>
+                                    </metadataCopy>
+                                </agent>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>build-native</id>
+                                    <goals>
+                                        <goal>compile-no-fork</goal>
+                                    </goals>
+                                    <phase>package</phase>
+                                </execution>
+                                <execution>
+                                    <id>test-native</id>
+                                    <goals>
+                                        <goal>test</goal>
+                                    </goals>
+                                    <phase>test</phase>
+                                </execution>
+                            </executions>
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
@@ -1110,30 +1134,30 @@
                                 </includes>
                             </configuration>
                         </plugin>
-<!--                        <plugin>-->
-                        <!--                            <groupId>org.graalvm.buildtools</groupId>-->
-                        <!--                            <artifactId>native-maven-plugin</artifactId>-->
-                        <!--                            <version>${native-maven-plugin.version}</version>-->
-                        <!--                            <extensions>true</extensions>-->
-                        <!--                            <configuration>-->
-                        <!--                                <buildArgs>-->
-                        <!--                                    <buildArg>-H:+AddAllCharsets</buildArg>-->
-                        <!--                                    <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>-->
-                        <!--                                    <buildArg>-H:ThrowMissingRegistrationErrors=</buildArg>-->
-                        <!--                                    <buildArg>-H:MissingRegistrationReportingMode=Warn</buildArg>-->
-                        <!--                                </buildArgs>-->
-                        <!--                                <quickBuild>true</quickBuild>-->
-                        <!--                            </configuration>-->
-                        <!--                            <executions>-->
-                        <!--                                <execution>-->
-                        <!--                                    <id>test-native</id>-->
-                        <!--                                    <goals>-->
-                        <!--                                        <goal>test</goal>-->
-                        <!--                                    </goals>-->
-                        <!--                                    <phase>test</phase>-->
-                        <!--                                </execution>-->
-                        <!--                            </executions>-->
-                        <!--                        </plugin>-->
+                        <plugin>
+                            <groupId>org.graalvm.buildtools</groupId>
+                            <artifactId>native-maven-plugin</artifactId>
+                            <version>${native-maven-plugin.version}</version>
+                            <extensions>true</extensions>
+                            <configuration>
+                                <buildArgs>
+                                    <buildArg>-H:+AddAllCharsets</buildArg>
+                                    <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+                                    <buildArg>-H:ThrowMissingRegistrationErrors=</buildArg>
+                                    <buildArg>-H:MissingRegistrationReportingMode=Warn</buildArg>
+                                </buildArgs>
+                                <quickBuild>true</quickBuild>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>test-native</id>
+                                    <goals>
+                                        <goal>test</goal>
+                                    </goals>
+                                    <phase>test</phase>
+                                </execution>
+                            </executions>
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>

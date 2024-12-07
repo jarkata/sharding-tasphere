@@ -70,4 +70,8 @@ public final class CDCIncrementalTask implements PipelineTask {
             importer.stop();
         }
     }
+    
+    @Override
+    public void close() {
+    }
 }

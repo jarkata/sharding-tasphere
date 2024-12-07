@@ -26,7 +26,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledInNativeImage;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -39,13 +39,15 @@ import java.sql.Statement;
 import java.time.Duration;
 import java.util.Properties;
 
-@SuppressWarnings("SqlNoDataSourceInspection")
+@SuppressWarnings({"SqlNoDataSourceInspection", "SameParameterValue", "resource"})
 @EnabledInNativeImage
 @Testcontainers
 class PostgresTest {
     
     @Container
-    public static final PostgreSQLContainer<?> POSTGRES_CONTAINER = new PostgreSQLContainer<>("postgres:17.2-bookworm");
+    public static final GenericContainer<?> POSTGRES_CONTAINER = new GenericContainer<>("postgres:16.3-bookworm")
+            .withEnv("POSTGRES_PASSWORD", "yourStrongPassword123!")
+            .withExposedPorts(5432);
     
     private static ProxyTestingServer proxyTestingServer;
     
@@ -54,18 +56,18 @@ class PostgresTest {
     @BeforeAll
     static void beforeAll() throws SQLException {
         Awaitility.await().atMost(Duration.ofSeconds(30L)).ignoreExceptions().until(() -> {
-            openConnection("test", "test", "jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/")
+            openConnection("postgres", "yourStrongPassword123!", "jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/")
                     .close();
             return true;
         });
         try (
-                Connection connection = openConnection("test", "test", "jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/");
+                Connection connection = openConnection("postgres", "yourStrongPassword123!", "jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/");
                 Statement statement = connection.createStatement()) {
             statement.executeUpdate("CREATE DATABASE demo_ds_0");
             statement.executeUpdate("CREATE DATABASE demo_ds_1");
             statement.executeUpdate("CREATE DATABASE demo_ds_2");
         }
-        String absolutePath = Paths.get("src/test/resources/test-native/yaml/proxy/databases/postgresql").toAbsolutePath().toString();
+        String absolutePath = Paths.get("src/test/resources/test-native/yaml/proxy/databases/postgresql").toAbsolutePath().normalize().toString();
         proxyTestingServer = new ProxyTestingServer(absolutePath);
         Awaitility.await().atMost(Duration.ofSeconds(30L)).ignoreExceptions().until(() -> {
             openConnection("root", "root", "jdbc:postgresql://127.0.0.1:" + proxyTestingServer.getProxyPort() + "/postgres").close();
@@ -97,16 +99,16 @@ class PostgresTest {
                 Statement statement = connection.createStatement()) {
             statement.execute("REGISTER STORAGE UNIT ds_0 (\n"
                     + "  URL=\"jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/demo_ds_0\",\n"
-                    + "  USER=\"test\",\n"
-                    + "  PASSWORD=\"test\"\n"
+                    + "  USER=\"postgres\",\n"
+                    + "  PASSWORD=\"yourStrongPassword123!\"\n"
                     + "),ds_1 (\n"
                     + "  URL=\"jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/demo_ds_1\",\n"
-                    + "  USER=\"test\",\n"
-                    + "  PASSWORD=\"test\"\n"
+                    + "  USER=\"postgres\",\n"
+                    + "  PASSWORD=\"yourStrongPassword123!\"\n"
                     + "),ds_2 (\n"
                     + "  URL=\"jdbc:postgresql://127.0.0.1:" + POSTGRES_CONTAINER.getMappedPort(5432) + "/demo_ds_2\",\n"
-                    + "  USER=\"test\",\n"
-                    + "  PASSWORD=\"test\"\n"
+                    + "  USER=\"postgres\",\n"
+                    + "  PASSWORD=\"yourStrongPassword123!\"\n"
                     + ")");
             statement.execute("CREATE DEFAULT SHARDING DATABASE STRATEGY (\n"
                     + "  TYPE=\"standard\", \n"

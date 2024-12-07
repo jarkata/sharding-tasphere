@@ -30,6 +30,4 @@ public final class ComputeNodeData {
     private final String attribute;
     
     private final String version;
-    
-    private final String databaseName;
 }

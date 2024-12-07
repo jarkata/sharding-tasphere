@@ -18,6 +18,8 @@
 package org.apache.shardingsphere.encrypt.rewrite.parameter.rewriter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseNameAware;
 import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.encrypt.rule.column.EncryptColumn;
 import org.apache.shardingsphere.infra.binder.context.segment.insert.values.OnDuplicateUpdateContext;
@@ -37,11 +39,12 @@ import java.util.List;
  * Insert on duplicate key update parameter rewriter for encrypt.
  */
 @RequiredArgsConstructor
-public final class EncryptInsertOnDuplicateKeyUpdateValueParameterRewriter implements ParameterRewriter {
+@Setter
+public final class EncryptInsertOnDuplicateKeyUpdateValueParameterRewriter implements ParameterRewriter, DatabaseNameAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
-    private final String databaseName;
+    private String databaseName;
     
     @Override
     public boolean isNeedRewrite(final SQLStatementContext sqlStatementContext) {
@@ -59,14 +62,14 @@ public final class EncryptInsertOnDuplicateKeyUpdateValueParameterRewriter imple
                 .orElseGet(() -> new DatabaseTypeRegistry(insertStatementContext.getDatabaseType()).getDefaultSchemaName(databaseName));
         for (int index = 0; index < onDuplicateKeyUpdateValueContext.getValueExpressions().size(); index++) {
             String logicColumnName = onDuplicateKeyUpdateValueContext.getColumn(index).getIdentifier().getValue();
-            if (!rule.findEncryptTable(tableName).map(optional -> optional.isEncryptColumn(logicColumnName)).orElse(false)) {
+            if (!encryptRule.findEncryptTable(tableName).map(optional -> optional.isEncryptColumn(logicColumnName)).orElse(false)) {
                 continue;
             }
             Object plainValue = onDuplicateKeyUpdateValueContext.getValue(index);
             if (plainValue instanceof FunctionSegment && "VALUES".equalsIgnoreCase(((FunctionSegment) plainValue).getFunctionName())) {
                 return;
             }
-            EncryptColumn encryptColumn = rule.getEncryptTable(tableName).getEncryptColumn(logicColumnName);
+            EncryptColumn encryptColumn = encryptRule.getEncryptTable(tableName).getEncryptColumn(logicColumnName);
             Object cipherColumnValue = encryptColumn.getCipher().encrypt(databaseName, schemaName, tableName, logicColumnName, plainValue);
             groupedParamBuilder.getGenericParameterBuilder().addReplacedParameters(index, cipherColumnValue);
             Collection<Object> addedParams = buildAddedParams(schemaName, tableName, encryptColumn, logicColumnName, plainValue);

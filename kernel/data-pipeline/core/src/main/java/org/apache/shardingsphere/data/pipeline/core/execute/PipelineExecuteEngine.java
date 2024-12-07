@@ -70,16 +70,6 @@ public final class PipelineExecuteEngine {
     }
     
     /**
-     * Submit a {@code LifecycleExecutor} to execute.
-     *
-     * @param pipelineLifecycleRunnable lifecycle executor
-     * @return execute future
-     */
-    public CompletableFuture<?> submit(final PipelineLifecycleRunnable pipelineLifecycleRunnable) {
-        return CompletableFuture.runAsync(pipelineLifecycleRunnable, executorService);
-    }
-    
-    /**
      * Submit a {@code LifecycleExecutor} with callback {@code ExecuteCallback} to execute.
      *
      * @param pipelineLifecycleRunnable lifecycle executor
@@ -92,19 +82,30 @@ public final class PipelineExecuteEngine {
                 executeCallback.onSuccess();
             } else {
                 Throwable cause = throwable.getCause();
-                executeCallback.onFailure(null == cause ? throwable : cause);
+                executeCallback.onFailure(null != cause ? cause : throwable);
             }
         }, CALLBACK_EXECUTOR);
+    }
+    
+    /**
+     * Submit a {@code LifecycleExecutor} to execute.
+     *
+     * @param pipelineLifecycleRunnable lifecycle executor
+     * @return execute future
+     */
+    public CompletableFuture<?> submit(final PipelineLifecycleRunnable pipelineLifecycleRunnable) {
+        return CompletableFuture.runAsync(pipelineLifecycleRunnable, executorService);
     }
     
     /**
      * Shutdown.
      */
     public void shutdown() {
-        if (!executorService.isShutdown()) {
-            executorService.shutdown();
-            executorService.shutdownNow();
+        if (executorService.isShutdown()) {
+            return;
         }
+        executorService.shutdown();
+        executorService.shutdownNow();
     }
     
     /**

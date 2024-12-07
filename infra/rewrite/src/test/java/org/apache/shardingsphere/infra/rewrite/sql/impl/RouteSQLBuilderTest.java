@@ -23,7 +23,6 @@ import org.apache.shardingsphere.infra.route.context.RouteMapper;
 import org.apache.shardingsphere.infra.route.context.RouteUnit;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -35,12 +34,6 @@ class RouteSQLBuilderTest {
     @Test
     void assertToSQLWithNormalSQLToken() {
         assertThat(new RouteSQLBuilder("SELECT * FROM tbl WHERE id=?", Collections.singletonList(new SQLTokenFixture(14, 16)), createRouteUnit()).toSQL(), is("SELECT * FROM XXX WHERE id=?"));
-    }
-    
-    @Test
-    void assertToSQLWithDuplicateSQLToken() {
-        assertThat(new RouteSQLBuilder("SELECT * FROM tbl WHERE id=?", Arrays.asList(new SQLTokenFixture(14, 16), new SQLTokenFixture(14, 16)), createRouteUnit()).toSQL(),
-                is("SELECT * FROM XXX WHERE id=?"));
     }
     
     @Test

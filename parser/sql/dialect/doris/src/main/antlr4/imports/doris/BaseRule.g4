@@ -150,9 +150,6 @@ identifierKeywordsUnambiguous
     | BEFORE
     | BINLOG
     | BIT
-    // DORIS ADDED BEGIN
-    | BITXOR
-    // DORIS ADDED END
     | BLOCK
     | BOOLEAN
     | BOOL
@@ -263,9 +260,6 @@ identifierKeywordsUnambiguous
     | INITIAL_SIZE
     | INSERT_METHOD
     | INSTANCE
-    // DORIS ADDED BEGIN
-    | INSTR
-    // DORIS ADDED END
     | INVISIBLE
     | INVOKER
     | IO
@@ -471,9 +465,6 @@ identifierKeywordsUnambiguous
     | STORAGE
     | STREAM
     | STRING
-    // DORIS ADDED BEGIN
-    | STRRIGHT
-    // DORIS ADDED END
     | SUBCLASS_ORIGIN
 //    | SUBDATE
     | SUBJECT
@@ -969,12 +960,6 @@ aggregationFunction
     : aggregationFunctionName LP_ distinct? (expr (COMMA_ expr)* | ASTERISK_)? collateClause? RP_ overClause?
     ;
 
-// DORIS ADDED BEGIN
-bitwiseFunction
-    : bitwiseBinaryFunctionName LP_ expr COMMA_ expr RP_
-    ;
-// DORIS ADDED END
-
 jsonFunction
     : jsonTableFunction
     | jsonFunctionName LP_ (expr? | expr (COMMA_ expr)*) RP_
@@ -1008,12 +993,6 @@ aggregationFunctionName
     : MAX | MIN | SUM | COUNT | AVG | BIT_XOR | GROUP_CONCAT
     ;
 
-// DORIS ADDED BEGIN
-bitwiseBinaryFunctionName
-    : BITXOR
-    ;
-// DORIS ADDED END
-
 distinct
     : DISTINCT
     ;
@@ -1045,16 +1024,10 @@ frameBetween
 specialFunction
     : castFunction
     | convertFunction
-    // DORIS ADDED BEGIN
-    | bitwiseFunction
-    // DORIS ADDED END
     | currentUserFunction
     | charFunction
     | extractFunction
     | groupConcatFunction
-    // DORIS ADDED BEGIN
-    | instrFunction
-    // DORIS ADDED END
     | positionFunction
     | substringFunction
     | trimFunction
@@ -1080,12 +1053,6 @@ timeStampDiffFunction
 groupConcatFunction
     : GROUP_CONCAT LP_ distinct? (expr (COMMA_ expr)* | ASTERISK_)? (orderByClause)? (SEPARATOR expr)? RP_
     ;
-
-// DORIS ADDED BEGIN
-instrFunction
-    : INSTR LP_ expr COMMA_ expr RP_
-    ;
-// DORIS ADDED END
 
 windowFunction
     : funcName = (ROW_NUMBER | RANK | DENSE_RANK | CUME_DIST | PERCENT_RANK) LP_ RP_ windowingClause
@@ -1210,11 +1177,7 @@ regularFunctionName
     | DATABASE | SCHEMA | LEFT | RIGHT | DATE | DAY | GEOMETRYCOLLECTION | REPEAT
     | LINESTRING | MULTILINESTRING | MULTIPOINT | MULTIPOLYGON | POINT | POLYGON
     | TIME | TIMESTAMP | TIMESTAMP_ADD | TIMESTAMP_DIFF | DATE | CURRENT_TIMESTAMP 
-    | CURRENT_DATE | CURRENT_TIME | UTC_TIMESTAMP 
-    // DORIS ADDED BEGIN
-    | STRRIGHT
-    // DORIS ADDED END
-    | identifier
+    | CURRENT_DATE | CURRENT_TIME | UTC_TIMESTAMP | identifier
     ;
 
 matchExpression

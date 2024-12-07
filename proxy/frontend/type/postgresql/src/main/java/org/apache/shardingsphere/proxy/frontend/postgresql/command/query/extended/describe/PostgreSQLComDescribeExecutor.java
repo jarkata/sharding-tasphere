@@ -180,7 +180,7 @@ public final class PostgreSQLComDescribeExecutor implements CommandExecutor {
         Collection<PostgreSQLColumnDescription> result = new LinkedList<>();
         for (ProjectionSegment each : returningSegment.getProjections().getProjections()) {
             if (each instanceof ShorthandProjectionSegment) {
-                table.getAllColumns().stream().map(column -> new PostgreSQLColumnDescription(column.getName(), 0, column.getDataType(), estimateColumnLength(column.getDataType()), ""))
+                table.getColumnValues().stream().map(column -> new PostgreSQLColumnDescription(column.getName(), 0, column.getDataType(), estimateColumnLength(column.getDataType()), ""))
                         .forEach(result::add);
             }
             if (each instanceof ColumnProjectionSegment) {
@@ -242,8 +242,8 @@ public final class PostgreSQLComDescribeExecutor implements CommandExecutor {
                 .bind(logicPreparedStatement.getSqlStatementContext().getSqlStatement(), Collections.emptyList());
         QueryContext queryContext = new QueryContext(sqlStatementContext, logicPreparedStatement.getSql(), Collections.emptyList(), logicPreparedStatement.getHintValueContext(),
                 connectionSession.getConnectionContext(), metaDataContexts.getMetaData());
-        ExecutionContext executionContext =
-                new KernelProcessor().generateExecutionContext(queryContext, metaDataContexts.getMetaData().getGlobalRuleMetaData(), metaDataContexts.getMetaData().getProps());
+        ExecutionContext executionContext = new KernelProcessor().generateExecutionContext(
+                queryContext, metaDataContexts.getMetaData().getGlobalRuleMetaData(), metaDataContexts.getMetaData().getProps(), connectionSession.getConnectionContext());
         ExecutionUnit executionUnitSample = executionContext.getExecutionUnits().iterator().next();
         ProxyDatabaseConnectionManager databaseConnectionManager = connectionSession.getDatabaseConnectionManager();
         Connection connection = databaseConnectionManager.getConnections(databaseName, executionUnitSample.getDataSourceName(), 0, 1, ConnectionMode.CONNECTION_STRICTLY).iterator().next();

@@ -17,9 +17,7 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.from.type;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
 import com.cedarsoftware.util.CaseInsensitiveSet;
-import com.google.common.collect.Multimap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
@@ -49,6 +47,7 @@ import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.Iden
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -76,8 +75,7 @@ public final class SimpleTableSegmentBinder {
      * @param tableBinderContexts table binder contexts
      * @return bound simple table segment
      */
-    public static SimpleTableSegment bind(final SimpleTableSegment segment, final SQLStatementBinderContext binderContext,
-                                          final Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts) {
+    public static SimpleTableSegment bind(final SimpleTableSegment segment, final SQLStatementBinderContext binderContext, final Map<String, TableSegmentBinderContext> tableBinderContexts) {
         fillPivotColumnNamesInBinderContext(segment, binderContext);
         IdentifierValue databaseName = getDatabaseName(segment, binderContext);
         ShardingSpherePreconditions.checkNotNull(databaseName.getValue(), NoDatabaseSelectedException::new);
@@ -85,8 +83,8 @@ public final class SimpleTableSegmentBinder {
         IdentifierValue tableName = segment.getTableName().getIdentifier();
         checkTableExists(binderContext, databaseName.getValue(), schemaName.getValue(), tableName.getValue());
         ShardingSphereSchema schema = binderContext.getMetaData().getDatabase(databaseName.getValue()).getSchema(schemaName.getValue());
-        tableBinderContexts.put(new CaseInsensitiveString(segment.getAliasName().orElseGet(tableName::getValue)),
-                createSimpleTableBinderContext(segment, schema, databaseName, schemaName, binderContext));
+        tableBinderContexts.putIfAbsent(
+                (segment.getAliasName().orElseGet(tableName::getValue)).toLowerCase(), createSimpleTableBinderContext(segment, schema, databaseName, schemaName, binderContext));
         TableNameSegment tableNameSegment = new TableNameSegment(segment.getTableName().getStartIndex(), segment.getTableName().getStopIndex(), tableName);
         SimpleTableSegment result = new SimpleTableSegment(tableNameSegment);
         segment.getOwner().ifPresent(result::setOwner);
@@ -95,7 +93,7 @@ public final class SimpleTableSegmentBinder {
     }
     
     private static void fillPivotColumnNamesInBinderContext(final SimpleTableSegment segment, final SQLStatementBinderContext binderContext) {
-        segment.getPivot().ifPresent(optional -> optional.getPivotColumns().forEach(each -> binderContext.getPivotColumnNames().add(each.getIdentifier().getValue())));
+        segment.getPivot().ifPresent(optional -> optional.getPivotColumns().forEach(each -> binderContext.getPivotColumnNames().add(each.getIdentifier().getValue().toLowerCase())));
     }
     
     private static IdentifierValue getDatabaseName(final SimpleTableSegment segment, final SQLStatementBinderContext binderContext) {
@@ -123,7 +121,7 @@ public final class SimpleTableSegmentBinder {
         if (SystemSchemaManager.isSystemTable(schemaName, tableName)) {
             return;
         }
-        if (binderContext.getExternalTableBinderContexts().containsKey(new CaseInsensitiveString(tableName))) {
+        if (binderContext.getExternalTableBinderContexts().containsKey(tableName)) {
             return;
         }
         ShardingSpherePreconditions.checkState(binderContext.getMetaData().containsDatabase(databaseName)
@@ -146,7 +144,7 @@ public final class SimpleTableSegmentBinder {
                                                                                                      final SQLStatementBinderContext binderContext, final IdentifierValue tableName) {
         Collection<ProjectionSegment> projectionSegments = new LinkedList<>();
         QuoteCharacter quoteCharacter = new DatabaseTypeRegistry(binderContext.getDatabaseType()).getDialectDatabaseMetaData().getQuoteCharacter();
-        for (ShardingSphereColumn each : schema.getTable(tableName.getValue()).getAllColumns()) {
+        for (ShardingSphereColumn each : schema.getTable(tableName.getValue()).getColumnValues()) {
             ColumnProjectionSegment columnProjectionSegment = new ColumnProjectionSegment(createColumnSegment(segment, databaseName, schemaName, each, quoteCharacter, tableName));
             columnProjectionSegment.setVisible(each.isVisible());
             projectionSegments.add(columnProjectionSegment);

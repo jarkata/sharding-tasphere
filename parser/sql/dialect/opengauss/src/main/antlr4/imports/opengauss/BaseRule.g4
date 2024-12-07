@@ -329,7 +329,6 @@ unreservedWord
     | PROCEDURES
     | PROGRAM
     | PUBLICATION
-    | QUARTER
     | QUOTE
     | RANGE
     | READ
@@ -428,7 +427,6 @@ unreservedWord
     | VIEW
     | VIEWS
     | VOLATILE
-    | WEEK
     | WHITESPACE
     | WITHIN
     | WITHOUT
@@ -1149,9 +1147,7 @@ extractList
 
 extractArg
     : YEAR
-    | QUARTER
     | MONTH
-    | WEEK
     | DAY
     | HOUR
     | MINUTE

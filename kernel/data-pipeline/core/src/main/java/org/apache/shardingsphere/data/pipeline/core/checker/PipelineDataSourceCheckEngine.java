@@ -40,12 +40,15 @@ import java.util.Collection;
  */
 public final class PipelineDataSourceCheckEngine {
     
-    private final DatabaseType databaseType;
+    private final DialectDatabasePrivilegeChecker privilegeChecker;
+    
+    private final DialectPipelineDatabaseVariableChecker variableChecker;
     
     private final PipelinePrepareSQLBuilder sqlBuilder;
     
     public PipelineDataSourceCheckEngine(final DatabaseType databaseType) {
-        this.databaseType = databaseType;
+        privilegeChecker = DatabaseTypedSPILoader.findService(DialectDatabasePrivilegeChecker.class, databaseType).orElse(null);
+        variableChecker = DatabaseTypedSPILoader.findService(DialectPipelineDatabaseVariableChecker.class, databaseType).orElse(null);
         sqlBuilder = new PipelinePrepareSQLBuilder(databaseType);
     }
     
@@ -72,8 +75,12 @@ public final class PipelineDataSourceCheckEngine {
      */
     public void checkSourceDataSources(final Collection<DataSource> dataSources) {
         checkConnection(dataSources);
-        DatabaseTypedSPILoader.findService(DialectDatabasePrivilegeChecker.class, databaseType).ifPresent(optional -> dataSources.forEach(each -> optional.check(each, PrivilegeCheckType.PIPELINE)));
-        DatabaseTypedSPILoader.findService(DialectPipelineDatabaseVariableChecker.class, databaseType).ifPresent(optional -> dataSources.forEach(optional::check));
+        if (null != privilegeChecker) {
+            dataSources.forEach(each -> privilegeChecker.check(each, PrivilegeCheckType.PIPELINE));
+        }
+        if (null != variableChecker) {
+            dataSources.forEach(variableChecker::check);
+        }
     }
     
     /**

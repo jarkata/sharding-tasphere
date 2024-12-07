@@ -28,7 +28,6 @@ import org.apache.shardingsphere.infra.binder.context.segment.select.projection.
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.impl.ColumnProjection;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.InsertStatementContext;
-import org.apache.shardingsphere.infra.binder.context.statement.dml.SelectStatementContext;
 import org.apache.shardingsphere.infra.exception.core.ShardingSpherePreconditions;
 import org.apache.shardingsphere.infra.exception.generic.UnsupportedSQLOperationException;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.CollectionSQLTokenGenerator;
@@ -50,7 +49,7 @@ import java.util.Optional;
 @Setter
 public final class EncryptInsertCipherNameTokenGenerator implements CollectionSQLTokenGenerator<InsertStatementContext> {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -67,9 +66,12 @@ public final class EncryptInsertCipherNameTokenGenerator implements CollectionSQ
         Preconditions.checkState(insertColumnsSegment.isPresent());
         Collection<ColumnSegment> insertColumns = insertColumnsSegment.get().getColumns();
         if (null != insertStatementContext.getInsertSelectContext()) {
-            checkInsertSelectEncryptor(insertStatementContext.getInsertSelectContext().getSelectStatementContext(), insertColumns);
+            Collection<Projection> projections = insertStatementContext.getInsertSelectContext().getSelectStatementContext().getProjectionsContext().getExpandProjections();
+            ShardingSpherePreconditions.checkState(insertColumns.size() == projections.size(), () -> new UnsupportedSQLOperationException("Column count doesn't match value count."));
+            ShardingSpherePreconditions.checkState(InsertSelectColumnsEncryptorComparator.isSame(insertColumns, projections, encryptRule),
+                    () -> new UnsupportedSQLOperationException("Can not use different encryptor in insert select columns"));
         }
-        EncryptTable encryptTable = rule.getEncryptTable(insertStatementContext.getSqlStatement().getTable().map(optional -> optional.getTableName().getIdentifier().getValue()).orElse(""));
+        EncryptTable encryptTable = encryptRule.getEncryptTable(insertStatementContext.getSqlStatement().getTable().map(optional -> optional.getTableName().getIdentifier().getValue()).orElse(""));
         Collection<SQLToken> result = new LinkedList<>();
         for (ColumnSegment each : insertColumns) {
             String columnName = each.getIdentifier().getValue();
@@ -80,12 +82,5 @@ public final class EncryptInsertCipherNameTokenGenerator implements CollectionSQ
             }
         }
         return result;
-    }
-    
-    private void checkInsertSelectEncryptor(final SelectStatementContext selectStatementContext, final Collection<ColumnSegment> insertColumns) {
-        Collection<Projection> projections = selectStatementContext.getProjectionsContext().getExpandProjections();
-        ShardingSpherePreconditions.checkState(insertColumns.size() == projections.size(), () -> new UnsupportedSQLOperationException("Column count doesn't match value count."));
-        ShardingSpherePreconditions.checkState(InsertSelectColumnsEncryptorComparator.isSame(insertColumns, projections, rule),
-                () -> new UnsupportedSQLOperationException("Can not use different encryptor in insert select columns"));
     }
 }

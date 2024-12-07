@@ -17,9 +17,6 @@
 
 package org.apache.shardingsphere.infra.binder.engine.statement.dml;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import lombok.SneakyThrows;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.TableSegmentBinder;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
@@ -27,6 +24,10 @@ import org.apache.shardingsphere.infra.binder.engine.segment.where.WhereSegmentB
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinder;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
 import org.apache.shardingsphere.sql.parser.statement.core.statement.dml.DeleteStatement;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Delete statement binder.
@@ -36,9 +37,9 @@ public final class DeleteStatementBinder implements SQLStatementBinder<DeleteSta
     @Override
     public DeleteStatement bind(final DeleteStatement sqlStatement, final SQLStatementBinderContext binderContext) {
         DeleteStatement result = copy(sqlStatement);
-        Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts = LinkedHashMultimap.create();
-        result.setTable(TableSegmentBinder.bind(sqlStatement.getTable(), binderContext, tableBinderContexts, LinkedHashMultimap.create()));
-        sqlStatement.getWhere().ifPresent(optional -> result.setWhere(WhereSegmentBinder.bind(optional, binderContext, tableBinderContexts, LinkedHashMultimap.create())));
+        Map<String, TableSegmentBinderContext> tableBinderContexts = new LinkedHashMap<>();
+        result.setTable(TableSegmentBinder.bind(sqlStatement.getTable(), binderContext, tableBinderContexts, Collections.emptyMap()));
+        sqlStatement.getWhere().ifPresent(optional -> result.setWhere(WhereSegmentBinder.bind(optional, binderContext, tableBinderContexts, Collections.emptyMap())));
         return result;
     }
     

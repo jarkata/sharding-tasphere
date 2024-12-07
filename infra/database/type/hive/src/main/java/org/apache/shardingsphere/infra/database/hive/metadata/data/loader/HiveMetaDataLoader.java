@@ -20,7 +20,6 @@ package org.apache.shardingsphere.infra.database.hive.metadata.data.loader;
 import org.apache.hadoop.hive.conf.HiveConf;
 import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
 import org.apache.hadoop.hive.metastore.api.FieldSchema;
-import org.apache.hadoop.hive.metastore.api.GetTableRequest;
 import org.apache.hadoop.hive.metastore.api.Table;
 import org.apache.shardingsphere.infra.database.core.metadata.data.loader.DialectMetaDataLoader;
 import org.apache.shardingsphere.infra.database.core.metadata.data.loader.MetaDataLoaderMaterial;
@@ -28,9 +27,11 @@ import org.apache.shardingsphere.infra.database.core.metadata.data.loader.type.T
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.ColumnMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.SchemaMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.TableMetaData;
-import org.apache.shardingsphere.infra.database.core.metadata.database.datatype.DataTypeRegistry;
+import org.apache.shardingsphere.infra.database.core.metadata.database.datatype.DataTypeLoader;
 import org.apache.thrift.TException;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -38,6 +39,7 @@ import java.sql.Types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Hive meta data loader.
@@ -68,7 +70,8 @@ public final class HiveMetaDataLoader implements DialectMetaDataLoader {
             HiveConf hiveConf = new HiveConf();
             hiveConf.set(HIVE_METASTORE_URIS, hiveMetastoreUris);
             storeClient = new HiveMetaStoreClient(hiveConf);
-            return Collections.singletonList(new SchemaMetaData(material.getDefaultSchemaName(), getTableMetaData(storeClient.getAllTables(material.getDefaultSchemaName()), storeClient, material)));
+            return Collections.singletonList(new SchemaMetaData(material.getDefaultSchemaName(),
+                    getTableMetaData(storeClient.getAllTables(material.getDefaultSchemaName()), storeClient, material)));
         } catch (final TException ignored) {
             throw new SQLException();
         } finally {
@@ -78,19 +81,27 @@ public final class HiveMetaDataLoader implements DialectMetaDataLoader {
         }
     }
     
-    private Collection<TableMetaData> getTableMetaData(final Collection<String> tables, final HiveMetaStoreClient storeClient, final MetaDataLoaderMaterial material) throws TException {
+    private Collection<TableMetaData> getTableMetaData(final Collection<String> tables, final HiveMetaStoreClient storeClient, final MetaDataLoaderMaterial material) throws TException, SQLException {
+        Map<String, Integer> dataTypes = getDataType(material.getDataSource());
         Collection<TableMetaData> result = new LinkedList<>();
         for (String each : tables) {
-            GetTableRequest req = new GetTableRequest(material.getDefaultSchemaName(), each);
-            result.add(new TableMetaData(each, getColumnMetaData(storeClient.getTable(req)), Collections.emptyList(), Collections.emptyList()));
+            result.add(new TableMetaData(each, getColumnMetaData(storeClient.getTable(material.getDefaultSchemaName(), each), dataTypes), Collections.emptyList(), Collections.emptyList()));
         }
         return result;
     }
     
-    private Collection<ColumnMetaData> getColumnMetaData(final Table table) {
+    private Map<String, Integer> getDataType(final DataSource dataSource) throws SQLException {
+        try (
+                Connection connection = dataSource.getConnection()) {
+            return new DataTypeLoader().load(connection.getMetaData(), getType());
+        }
+    }
+    
+    private Collection<ColumnMetaData> getColumnMetaData(final Table table, final Map<String, Integer> dataTypes) {
         Collection<ColumnMetaData> result = new LinkedList<>();
         for (FieldSchema each : table.getSd().getCols()) {
-            result.add(new ColumnMetaData(each.getName(), DataTypeRegistry.getDataType(getDatabaseType(), each.getType()).orElse(Types.VARCHAR), false, false, false, false, false, false));
+            result.add(new ColumnMetaData(each.getName(), null == dataTypes.get(each.getType()) ? Types.VARCHAR : dataTypes.get(each.getType()),
+                    false, false, false, false, false, false));
         }
         return result;
     }

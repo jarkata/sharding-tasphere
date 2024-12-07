@@ -30,9 +30,4 @@ public final class SQLFederationDeciderRuleMatchFixture implements ShardingSpher
     public RuleConfiguration getConfiguration() {
         return new SQLFederationRuleConfiguration(true, false, mock(CacheOption.class));
     }
-    
-    @Override
-    public int getOrder() {
-        return 0;
-    }
 }

@@ -21,7 +21,6 @@ import lombok.Getter;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.ddl.CreateIndexStatementContext;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereSchema;
-import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereTable;
 import org.apache.shardingsphere.infra.metadata.database.schema.util.IndexMetaDataUtils;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.RouteUnitAware;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.SQLToken;
@@ -45,7 +44,7 @@ public final class IndexToken extends SQLToken implements Substitutable, RouteUn
     
     private final SQLStatementContext sqlStatementContext;
     
-    private final ShardingRule rule;
+    private final ShardingRule shardingRule;
     
     private final ShardingSphereSchema schema;
     
@@ -55,7 +54,7 @@ public final class IndexToken extends SQLToken implements Substitutable, RouteUn
         this.stopIndex = stopIndex;
         this.identifier = identifier;
         this.sqlStatementContext = sqlStatementContext;
-        this.rule = shardingRule;
+        this.shardingRule = shardingRule;
         this.schema = schema;
     }
     
@@ -71,18 +70,18 @@ public final class IndexToken extends SQLToken implements Substitutable, RouteUn
     
     private String getIndexValue(final RouteUnit routeUnit) {
         Optional<String> logicTableName = findLogicTableNameFromMetaData(identifier.getValue());
-        if (logicTableName.isPresent() && !rule.isShardingTable(logicTableName.get())) {
+        if (logicTableName.isPresent() && !shardingRule.isShardingTable(logicTableName.get())) {
             return identifier.getValue();
         }
-        Map<String, String> logicAndActualTables = ShardingTokenUtils.getLogicAndActualTableMap(routeUnit, sqlStatementContext, rule);
+        Map<String, String> logicAndActualTables = TokenUtils.getLogicAndActualTableMap(routeUnit, sqlStatementContext, shardingRule);
         String actualTableName = logicTableName.map(logicAndActualTables::get).orElseGet(() -> logicAndActualTables.isEmpty() ? null : logicAndActualTables.values().iterator().next());
         return IndexMetaDataUtils.getActualIndexName(identifier.getValue(), actualTableName);
     }
     
     private Optional<String> findLogicTableNameFromMetaData(final String logicIndexName) {
-        for (ShardingSphereTable each : schema.getAllTables()) {
-            if (each.containsIndex(logicIndexName)) {
-                return Optional.of(each.getName());
+        for (String each : schema.getAllTableNames()) {
+            if (schema.getTable(each).containsIndex(logicIndexName)) {
+                return Optional.of(each);
             }
         }
         return Optional.empty();

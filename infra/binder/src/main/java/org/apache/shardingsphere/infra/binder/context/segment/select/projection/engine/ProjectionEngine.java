@@ -108,8 +108,11 @@ public final class ProjectionEngine {
     private ColumnProjection createProjection(final ColumnProjectionSegment projectionSegment) {
         IdentifierValue owner = projectionSegment.getColumn().getOwner().isPresent() ? projectionSegment.getColumn().getOwner().get().getIdentifier() : null;
         IdentifierValue alias = projectionSegment.getAliasName().isPresent() ? projectionSegment.getAlias().orElse(null) : null;
-        return new ColumnProjection(owner, projectionSegment.getColumn().getIdentifier(), alias, databaseType,
-                projectionSegment.getColumn().getLeftParentheses().orElse(null), projectionSegment.getColumn().getRightParentheses().orElse(null), projectionSegment.getColumn().getColumnBoundInfo());
+        ColumnProjection result = new ColumnProjection(owner, projectionSegment.getColumn().getIdentifier(), alias, databaseType, projectionSegment.getColumn().getLeftParentheses().orElse(null),
+                projectionSegment.getColumn().getRightParentheses().orElse(null));
+        result.setOriginalColumn(projectionSegment.getColumn().getColumnBoundInfo().getOriginalColumn());
+        result.setOriginalTable(projectionSegment.getColumn().getColumnBoundInfo().getOriginalTable());
+        return result;
     }
     
     private ExpressionProjection createProjection(final ExpressionProjectionSegment projectionSegment) {
@@ -121,7 +124,7 @@ public final class ProjectionEngine {
                 projectionSegment.getAlias().orElseGet(() -> new IdentifierValue(DerivedColumn.AGGREGATION_DISTINCT_DERIVED.getDerivedColumnAlias(aggregationDistinctDerivedColumnCount++)));
         AggregationDistinctProjection result = new AggregationDistinctProjection(
                 projectionSegment.getStartIndex(), projectionSegment.getStopIndex(), projectionSegment.getType(), projectionSegment.getExpression(), alias,
-                projectionSegment.getDistinctInnerExpression(), databaseType, projectionSegment.getSeparator().orElse(null));
+                projectionSegment.getDistinctInnerExpression(), databaseType);
         if (AggregationType.AVG == result.getType()) {
             appendAverageDistinctDerivedProjection(result);
         }
@@ -129,9 +132,7 @@ public final class ProjectionEngine {
     }
     
     private AggregationProjection createProjection(final AggregationProjectionSegment projectionSegment) {
-        AggregationProjection result =
-                new AggregationProjection(projectionSegment.getType(), projectionSegment.getExpression(), projectionSegment.getAlias().orElse(null), databaseType,
-                        projectionSegment.getSeparator().orElse(null));
+        AggregationProjection result = new AggregationProjection(projectionSegment.getType(), projectionSegment.getExpression(), projectionSegment.getAlias().orElse(null), databaseType);
         if (AggregationType.AVG == result.getType()) {
             appendAverageDerivedProjection(result);
             // TODO replace avg to constant, avoid calculate useless avg

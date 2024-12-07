@@ -117,7 +117,8 @@ public final class PreviewExecutor implements DistSQLQueryExecutor<PreviewStatem
         if (federationEngine.decide(queryContext, metaData.getGlobalRuleMetaData())) {
             return getFederationExecutionUnits(queryContext, metaData, federationEngine);
         }
-        return new KernelProcessor().generateExecutionContext(queryContext, metaData.getGlobalRuleMetaData(), metaData.getProps()).getExecutionUnits();
+        return new KernelProcessor().generateExecutionContext(queryContext, metaData.getGlobalRuleMetaData(), metaData.getProps(), connectionContext.getQueryContext().getConnectionContext())
+                .getExecutionUnits();
     }
     
     private void setUpCursorDefinition(final SQLStatementContext toBePreviewedStatementContext) {

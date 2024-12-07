@@ -20,10 +20,8 @@ package org.apache.shardingsphere.test.natived.jdbc.databases;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.shardingsphere.test.natived.commons.TestShardingService;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledInNativeImage;
-import org.testcontainers.jdbc.ContainerDatabaseDriver;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -33,16 +31,11 @@ class SQLServerTest {
     
     private TestShardingService testShardingService;
     
-    @AfterAll
-    static void afterAll() {
-        ContainerDatabaseDriver.killContainers();
-    }
-    
     @Test
     void assertShardingInLocalTransactions() throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.apache.shardingsphere.driver.ShardingSphereDriver");
-        config.setJdbcUrl("jdbc:shardingsphere:classpath:test-native/yaml/jdbc/databases/sqlserver.yaml");
+        config.setJdbcUrl("jdbc:shardingsphere:classpath:test-native/yaml/databases/sqlserver.yaml");
         DataSource dataSource = new HikariDataSource(config);
         testShardingService = new TestShardingService(dataSource);
         initEnvironment();

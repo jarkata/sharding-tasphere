@@ -38,8 +38,6 @@ public enum PostgreSQLState implements SQLState {
     
     INVALID_PASSWORD("28P01"),
     
-    UNDEFINED_TABLE("42P01"),
-    
     UNDEFINED_COLUMN("42703"),
     
     SYSTEM_ERROR("58000"),

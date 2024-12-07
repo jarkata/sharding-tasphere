@@ -57,6 +57,9 @@ public enum MySQLAuthenticationPlugin {
      * @return mysql authentication plugin
      */
     public static MySQLAuthenticationPlugin getPluginByName(final String pluginName) {
-        return VALUE_AND_COLUMN_TYPE_MAP.getOrDefault(pluginName, DEFAULT);
+        if (VALUE_AND_COLUMN_TYPE_MAP.containsKey(pluginName)) {
+            return VALUE_AND_COLUMN_TYPE_MAP.get(pluginName);
+        }
+        return DEFAULT;
     }
 }

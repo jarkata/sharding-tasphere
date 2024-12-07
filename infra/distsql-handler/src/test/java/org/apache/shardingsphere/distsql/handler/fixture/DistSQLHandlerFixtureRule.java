@@ -52,9 +52,4 @@ public final class DistSQLHandlerFixtureRule implements ShardingSphereRule {
         when(result.findActualTableByCatalog(any(), any())).thenReturn(Optional.empty());
         return result;
     }
-    
-    @Override
-    public int getOrder() {
-        return 0;
-    }
 }

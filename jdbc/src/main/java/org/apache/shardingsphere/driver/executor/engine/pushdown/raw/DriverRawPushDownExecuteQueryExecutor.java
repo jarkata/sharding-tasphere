@@ -32,6 +32,7 @@ import org.apache.shardingsphere.infra.executor.sql.execute.result.query.QueryRe
 import org.apache.shardingsphere.infra.executor.sql.prepare.raw.RawExecutionPrepareEngine;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
+import org.apache.shardingsphere.infra.metadata.database.rule.RuleMetaData;
 import org.apache.shardingsphere.infra.session.connection.ConnectionContext;
 import org.apache.shardingsphere.infra.session.query.QueryContext;
 
@@ -52,7 +53,7 @@ public final class DriverRawPushDownExecuteQueryExecutor {
     
     private final String processId;
     
-    private final ShardingSphereMetaData metaData;
+    private final RuleMetaData globalRuleMetaData;
     
     private final ConfigurationProperties props;
     
@@ -61,7 +62,7 @@ public final class DriverRawPushDownExecuteQueryExecutor {
     public DriverRawPushDownExecuteQueryExecutor(final ShardingSphereConnection connection, final ShardingSphereMetaData metaData, final RawExecutor rawExecutor) {
         connectionContext = connection.getDatabaseConnectionManager().getConnectionContext();
         processId = connection.getProcessId();
-        this.metaData = metaData;
+        globalRuleMetaData = metaData.getGlobalRuleMetaData();
         props = metaData.getProps();
         this.rawExecutor = rawExecutor;
     }
@@ -79,12 +80,12 @@ public final class DriverRawPushDownExecuteQueryExecutor {
     public ResultSet executeQuery(final ShardingSphereDatabase database, final QueryContext queryContext, final Statement statement,
                                   final Map<String, Integer> columnLabelAndIndexMap) throws SQLException {
         List<QueryResult> queryResults = getQueryResults(database, queryContext);
-        return new ShardingSphereResultSetFactory(connectionContext, metaData, props, Collections.emptyList())
+        return new ShardingSphereResultSetFactory(connectionContext, globalRuleMetaData, props, Collections.emptyList())
                 .newInstance(database, queryContext, queryResults, statement, columnLabelAndIndexMap);
     }
     
     private List<QueryResult> getQueryResults(final ShardingSphereDatabase database, final QueryContext queryContext) throws SQLException {
-        ExecutionContext executionContext = new KernelProcessor().generateExecutionContext(queryContext, metaData.getGlobalRuleMetaData(), props);
+        ExecutionContext executionContext = new KernelProcessor().generateExecutionContext(queryContext, globalRuleMetaData, props, connectionContext);
         return rawExecutor.execute(
                 createRawExecutionGroupContext(database, executionContext), queryContext, new RawSQLExecutorCallback()).stream().map(QueryResult.class::cast).collect(Collectors.toList());
     }

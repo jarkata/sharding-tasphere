@@ -23,6 +23,7 @@ import org.apache.shardingsphere.encrypt.rule.table.EncryptTable;
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.impl.ColumnProjection;
 import org.apache.shardingsphere.infra.binder.context.segment.table.TablesContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.SelectStatementContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.SQLToken;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
@@ -64,6 +65,8 @@ class EncryptProjectionTokenGeneratorTest {
         EncryptRule result = mock(EncryptRule.class, RETURNS_DEEP_STUBS);
         EncryptTable encryptTable1 = mock(EncryptTable.class);
         EncryptTable encryptTable2 = mock(EncryptTable.class);
+        when(encryptTable1.getLogicColumns()).thenReturn(Collections.singleton("mobile"));
+        when(encryptTable2.getLogicColumns()).thenReturn(Collections.singleton("mobile"));
         when(result.findEncryptTable("doctor")).thenReturn(Optional.of(encryptTable1));
         when(result.findEncryptTable("doctor1")).thenReturn(Optional.of(encryptTable2));
         when(encryptTable1.isEncryptColumn("mobile")).thenReturn(true);
@@ -80,7 +83,7 @@ class EncryptProjectionTokenGeneratorTest {
         SimpleTableSegment doctorTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor")));
         doctorTable.setAlias(new AliasSegment(0, 0, new IdentifierValue("a")));
         ColumnSegment column = new ColumnSegment(0, 0, new IdentifierValue("mobile"));
-        column.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue("foo_db"), new IdentifierValue("foo_db"), new IdentifierValue("doctor"),
+        column.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("doctor"),
                 new IdentifierValue("mobile")));
         column.setOwner(new OwnerSegment(0, 0, new IdentifierValue("a")));
         ProjectionsSegment projections = mock(ProjectionsSegment.class);
@@ -91,7 +94,7 @@ class EncryptProjectionTokenGeneratorTest {
         when(sqlStatementContext.getSqlStatement().getProjections()).thenReturn(projections);
         when(sqlStatementContext.getSubqueryContexts().values()).thenReturn(Collections.emptyList());
         SimpleTableSegment doctorOneTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor1")));
-        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, doctorOneTable), databaseType, "foo_db"));
+        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, doctorOneTable), databaseType, DefaultDatabase.LOGIC_NAME));
         when(sqlStatementContext.getProjectionsContext().getProjections()).thenReturn(Collections.singleton(new ColumnProjection("a", "mobile", null, databaseType)));
         Collection<SQLToken> actual = generator.generateSQLTokens(sqlStatementContext);
         assertThat(actual.size(), is(1));
@@ -102,7 +105,7 @@ class EncryptProjectionTokenGeneratorTest {
         SimpleTableSegment doctorTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor")));
         doctorTable.setAlias(new AliasSegment(0, 0, new IdentifierValue("a")));
         ColumnSegment column = new ColumnSegment(0, 0, new IdentifierValue("mobile"));
-        column.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue("foo_db"), new IdentifierValue("foo_db"), new IdentifierValue("doctor"),
+        column.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("doctor"),
                 new IdentifierValue("mobile")));
         column.setOwner(new OwnerSegment(0, 0, new IdentifierValue("a")));
         ProjectionsSegment projections = mock(ProjectionsSegment.class);
@@ -113,7 +116,7 @@ class EncryptProjectionTokenGeneratorTest {
         when(sqlStatementContext.getSqlStatement().getProjections()).thenReturn(projections);
         when(sqlStatementContext.getSubqueryContexts().values()).thenReturn(Collections.emptyList());
         SimpleTableSegment sameDoctorTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor")));
-        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, sameDoctorTable), databaseType, "foo_db"));
+        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, sameDoctorTable), databaseType, DefaultDatabase.LOGIC_NAME));
         when(sqlStatementContext.getProjectionsContext().getProjections()).thenReturn(Collections.singleton(new ColumnProjection("a", "mobile", null, databaseType)));
         Collection<SQLToken> actual = generator.generateSQLTokens(sqlStatementContext);
         assertThat(actual.size(), is(1));
@@ -132,7 +135,7 @@ class EncryptProjectionTokenGeneratorTest {
         when(sqlStatementContext.getSubqueryContexts().values()).thenReturn(Collections.emptyList());
         SimpleTableSegment doctorTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor")));
         SimpleTableSegment doctorOneTable = new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("doctor1")));
-        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, doctorOneTable), databaseType, "foo_db"));
+        when(sqlStatementContext.getTablesContext()).thenReturn(new TablesContext(Arrays.asList(doctorTable, doctorOneTable), databaseType, DefaultDatabase.LOGIC_NAME));
         when(sqlStatementContext.getProjectionsContext().getProjections()).thenReturn(Collections.singleton(new ColumnProjection("doctor", "mobile", null, databaseType)));
         Collection<SQLToken> actual = generator.generateSQLTokens(sqlStatementContext);
         assertThat(actual.size(), is(1));

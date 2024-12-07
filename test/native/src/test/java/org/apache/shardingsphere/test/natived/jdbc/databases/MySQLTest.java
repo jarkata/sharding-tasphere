@@ -29,6 +29,7 @@ import org.junit.jupiter.api.condition.EnabledInNativeImage;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -60,7 +61,7 @@ class MySQLTest {
     
     @SuppressWarnings("resource")
     @Container
-    public static final GenericContainer<?> CONTAINER = new GenericContainer<>("mysql:9.1.0-oraclelinux9")
+    public static final GenericContainer<?> CONTAINER = new GenericContainer<>(DockerImageName.parse("mysql:9.0.1-oraclelinux9"))
             .withEnv("MYSQL_DATABASE", DATABASE)
             .withEnv("MYSQL_ROOT_PASSWORD", PASSWORD)
             .withExposedPorts(3306);
@@ -111,7 +112,7 @@ class MySQLTest {
     
     @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
     private DataSource createDataSource() throws SQLException {
-        Awaitility.await().atMost(Duration.ofMinutes(1L)).ignoreExceptionsMatching(CommunicationsException.class::isInstance).until(() -> {
+        Awaitility.await().atMost(Duration.ofMinutes(1L)).ignoreExceptionsMatching(e -> e instanceof CommunicationsException).until(() -> {
             openConnection().close();
             return true;
         });
@@ -124,7 +125,7 @@ class MySQLTest {
         }
         HikariConfig config = new HikariConfig();
         config.setDriverClassName("org.apache.shardingsphere.driver.ShardingSphereDriver");
-        config.setJdbcUrl("jdbc:shardingsphere:classpath:test-native/yaml/jdbc/databases/mysql.yaml?placeholder-type=system_props");
+        config.setJdbcUrl("jdbc:shardingsphere:classpath:test-native/yaml/databases/mysql.yaml?placeholder-type=system_props");
         System.setProperty(SYSTEM_PROP_KEY_PREFIX + "ds0.jdbc-url", jdbcUrlPrefix + "demo_ds_0");
         System.setProperty(SYSTEM_PROP_KEY_PREFIX + "ds1.jdbc-url", jdbcUrlPrefix + "demo_ds_1");
         System.setProperty(SYSTEM_PROP_KEY_PREFIX + "ds2.jdbc-url", jdbcUrlPrefix + "demo_ds_2");

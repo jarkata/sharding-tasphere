@@ -37,6 +37,11 @@ public final class StringPrimaryKeyIngestPosition implements PrimaryKeyIngestPos
     }
     
     @Override
+    public String convert(final String value) {
+        return value;
+    }
+    
+    @Override
     public char getType() {
         return 's';
     }

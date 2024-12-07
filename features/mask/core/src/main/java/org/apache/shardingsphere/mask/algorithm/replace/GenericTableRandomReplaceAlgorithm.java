@@ -83,11 +83,11 @@ public final class GenericTableRandomReplaceAlgorithm implements MaskAlgorithm<O
         char[] chars = result.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
-            if (c >= 'A' && c <= 'Z') {
+            if ('A' <= c && c <= 'Z') {
                 chars[i] = uppercaseLetterCodes.get(random.nextInt(uppercaseLetterCodes.size()));
-            } else if (c >= 'a' && c <= 'z') {
+            } else if ('a' <= c && c <= 'z') {
                 chars[i] = lowercaseLetterCodes.get(random.nextInt(lowercaseLetterCodes.size()));
-            } else if (c >= '0' && c <= '9') {
+            } else if ('0' <= c && c <= '9') {
                 chars[i] = digitalCodes.get(random.nextInt(digitalCodes.size()));
             } else {
                 chars[i] = specialCodes.get(random.nextInt(specialCodes.size()));

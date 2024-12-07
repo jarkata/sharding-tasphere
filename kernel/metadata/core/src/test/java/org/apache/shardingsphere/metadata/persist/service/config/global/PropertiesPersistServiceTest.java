@@ -33,6 +33,7 @@ import java.util.Properties;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,9 +45,11 @@ class PropertiesPersistServiceTest {
     @Mock
     private PersistRepository repository;
     
+    @Mock
+    private MetaDataVersionPersistService metaDataVersionPersistService;
+    
     @BeforeEach
     void setUp() {
-        MetaDataVersionPersistService metaDataVersionPersistService = new MetaDataVersionPersistService(repository);
         persistService = new PropertiesPersistService(repository, metaDataVersionPersistService);
         when(repository.query("/props/active_version")).thenReturn("0");
     }
@@ -66,10 +69,11 @@ class PropertiesPersistServiceTest {
     
     @Test
     void assertPersistWithEmptyActiveVersion() {
-        when(repository.query("/props/active_version")).thenReturn("", "0");
+        when(repository.query("/props/active_version")).thenReturn("");
         persistService.persist(PropertiesBuilder.build(new Property("k", "v")));
         verify(repository).persist("/props/versions/0", "k: v" + System.lineSeparator());
         verify(repository).persist("/props/active_version", "0");
+        verify(metaDataVersionPersistService).switchActiveVersion(any());
     }
     
     @Test
@@ -77,6 +81,6 @@ class PropertiesPersistServiceTest {
         when(repository.getChildrenKeys("/props/versions")).thenReturn(Collections.singletonList("10"));
         persistService.persist(PropertiesBuilder.build(new Property("k", "v")));
         verify(repository).persist("/props/versions/11", "k: v" + System.lineSeparator());
-        verify(repository).persist("/props/active_version", "11");
+        verify(metaDataVersionPersistService).switchActiveVersion(any());
     }
 }

@@ -17,8 +17,6 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.lock;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.Multimap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.SegmentType;
@@ -27,6 +25,7 @@ import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableS
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.predicate.LockSegment;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -45,8 +44,7 @@ public final class LockSegmentBinder {
      * @return bound lock segment
      */
     public static LockSegment bind(final LockSegment segment, final SQLStatementBinderContext binderContext,
-                                   final Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts,
-                                   final Multimap<CaseInsensitiveString, TableSegmentBinderContext> outerTableBinderContexts) {
+                                   final Map<String, TableSegmentBinderContext> tableBinderContexts, final Map<String, TableSegmentBinderContext> outerTableBinderContexts) {
         LockSegment result = new LockSegment(segment.getStartIndex(), segment.getStopIndex());
         result.getTables().addAll(segment.getTables());
         result.getColumns().addAll(segment.getColumns().stream()

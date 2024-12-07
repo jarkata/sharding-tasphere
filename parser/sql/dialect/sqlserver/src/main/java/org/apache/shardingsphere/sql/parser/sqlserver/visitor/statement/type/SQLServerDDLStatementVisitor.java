@@ -17,8 +17,6 @@
 
 package org.apache.shardingsphere.sql.parser.sqlserver.visitor.statement.type;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 import org.apache.shardingsphere.sql.parser.api.ASTNode;
 import org.apache.shardingsphere.sql.parser.api.visitor.statement.type.DDLStatementVisitor;
 import org.apache.shardingsphere.sql.parser.autogen.SQLServerStatementParser.AddColumnSpecificationContext;
@@ -70,7 +68,6 @@ import org.apache.shardingsphere.sql.parser.autogen.SQLServerStatementParser.Mod
 import org.apache.shardingsphere.sql.parser.autogen.SQLServerStatementParser.TableConstraintContext;
 import org.apache.shardingsphere.sql.parser.autogen.SQLServerStatementParser.TruncateTableContext;
 import org.apache.shardingsphere.sql.parser.autogen.SQLServerStatementParser.ViewNameContext;
-import org.apache.shardingsphere.sql.parser.sqlserver.visitor.statement.SQLServerStatementVisitor;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.ddl.AlterDefinitionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.ddl.CreateDefinitionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.ddl.column.ColumnDefinitionSegment;
@@ -119,6 +116,7 @@ import org.apache.shardingsphere.sql.parser.statement.sqlserver.ddl.SQLServerDro
 import org.apache.shardingsphere.sql.parser.statement.sqlserver.ddl.SQLServerDropViewStatement;
 import org.apache.shardingsphere.sql.parser.statement.sqlserver.ddl.SQLServerTruncateStatement;
 import org.apache.shardingsphere.sql.parser.statement.sqlserver.dml.SQLServerSelectStatement;
+import org.apache.shardingsphere.sql.parser.sqlserver.visitor.statement.SQLServerStatementVisitor;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -168,7 +166,7 @@ public final class SQLServerDDLStatementVisitor extends SQLServerStatementVisito
         DataTypeSegment dataType = (DataTypeSegment) visit(ctx.dataType());
         boolean isPrimaryKey = isPrimaryKey(ctx);
         // TODO parse not null
-        ColumnDefinitionSegment result = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, isPrimaryKey, false, getText(ctx));
+        ColumnDefinitionSegment result = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, isPrimaryKey, false);
         for (ColumnDefinitionOptionContext each : ctx.columnDefinitionOption()) {
             for (ColumnConstraintContext columnConstraint : each.columnConstraint()) {
                 if (null != columnConstraint.columnForeignKeyConstraint()) {
@@ -182,10 +180,6 @@ public final class SQLServerDDLStatementVisitor extends SQLServerStatementVisito
             }
         }
         return result;
-    }
-    
-    private String getText(final ParserRuleContext ctx) {
-        return ctx.start.getInputStream().getText(new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
     }
     
     private boolean isPrimaryKey(final ColumnDefinitionContext ctx) {
@@ -293,7 +287,7 @@ public final class SQLServerDDLStatementVisitor extends SQLServerStatementVisito
         // TODO visit pk and table ref
         ColumnSegment column = (ColumnSegment) visit(ctx.alterColumnOperation().columnName());
         DataTypeSegment dataType = (DataTypeSegment) visit(ctx.dataType());
-        ColumnDefinitionSegment columnDefinition = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, false, false, getText(ctx));
+        ColumnDefinitionSegment columnDefinition = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, false, false);
         return new ModifyColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), columnDefinition);
     }
     

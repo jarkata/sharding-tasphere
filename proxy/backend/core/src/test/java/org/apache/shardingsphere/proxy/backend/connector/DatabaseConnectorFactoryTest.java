@@ -19,6 +19,7 @@ package org.apache.shardingsphere.proxy.backend.connector;
 
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.hint.HintValueContext;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
@@ -62,8 +63,8 @@ class DatabaseConnectorFactoryTest {
         when(sqlStatementContext.getDatabaseType()).thenReturn(databaseType);
         ShardingSphereDatabase database = mockDatabase();
         ShardingSphereMetaData metaData = mock(ShardingSphereMetaData.class);
-        when(metaData.containsDatabase("foo_db")).thenReturn(true);
-        when(metaData.getDatabase("foo_db")).thenReturn(database);
+        when(metaData.containsDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(metaData.getDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(database);
         QueryContext queryContext = new QueryContext(sqlStatementContext, "schemaName", Collections.emptyList(), new HintValueContext(), mockConnectionContext(), metaData);
         ContextManager contextManager = mockContextManager(database);
         when(ProxyContext.getInstance().getContextManager()).thenReturn(contextManager);
@@ -73,7 +74,7 @@ class DatabaseConnectorFactoryTest {
     
     private ConnectionContext mockConnectionContext() {
         ConnectionContext result = mock(ConnectionContext.class);
-        when(result.getCurrentDatabaseName()).thenReturn(Optional.of("foo_db"));
+        when(result.getCurrentDatabaseName()).thenReturn(Optional.of(DefaultDatabase.LOGIC_NAME));
         return result;
     }
     
@@ -85,8 +86,8 @@ class DatabaseConnectorFactoryTest {
         when(sqlStatementContext.getDatabaseType()).thenReturn(databaseType);
         ShardingSphereDatabase database = mockDatabase();
         ShardingSphereMetaData metaData = mock(ShardingSphereMetaData.class);
-        when(metaData.containsDatabase("foo_db")).thenReturn(true);
-        when(metaData.getDatabase("foo_db")).thenReturn(database);
+        when(metaData.containsDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(metaData.getDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(database);
         ContextManager contextManager = mockContextManager(database);
         when(ProxyContext.getInstance().getContextManager()).thenReturn(contextManager);
         assertThat(DatabaseConnectorFactory.getInstance().newInstance(
@@ -96,7 +97,8 @@ class DatabaseConnectorFactoryTest {
     
     private ContextManager mockContextManager(final ShardingSphereDatabase database) {
         MetaDataContexts metaDataContexts = MetaDataContextsFactory.create(mock(MetaDataPersistService.class),
-                new ShardingSphereMetaData(Collections.singleton(database), mock(ResourceMetaData.class), mock(RuleMetaData.class), new ConfigurationProperties(new Properties())));
+                new ShardingSphereMetaData(Collections.singletonMap("foo_db", database), mock(ResourceMetaData.class),
+                        mock(RuleMetaData.class), new ConfigurationProperties(new Properties())));
         ContextManager result = mock(ContextManager.class, RETURNS_DEEP_STUBS);
         when(result.getMetaDataContexts()).thenReturn(metaDataContexts);
         when(result.getDatabase("foo_db")).thenReturn(database);
@@ -105,7 +107,6 @@ class DatabaseConnectorFactoryTest {
     
     private ShardingSphereDatabase mockDatabase() {
         ShardingSphereDatabase result = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-        when(result.getName()).thenReturn("foo_db");
         when(result.containsDataSource()).thenReturn(true);
         when(result.isComplete()).thenReturn(true);
         when(result.getProtocolType()).thenReturn(databaseType);

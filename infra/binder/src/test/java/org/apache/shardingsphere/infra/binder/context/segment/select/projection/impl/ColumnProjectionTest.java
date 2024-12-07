@@ -19,7 +19,6 @@ package org.apache.shardingsphere.infra.binder.context.segment.select.projection
 
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
-import org.apache.shardingsphere.sql.parser.statement.core.segment.generic.bound.ColumnSegmentBoundInfo;
 import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.IdentifierValue;
 import org.junit.jupiter.api.Test;
 
@@ -45,15 +44,15 @@ class ColumnProjectionTest {
     
     @Test
     void assertGetOriginalTableWithEmptyOriginalTableAndWithOwner() {
-        ColumnProjection projection = new ColumnProjection(new IdentifierValue("owner"), new IdentifierValue("name"), new IdentifierValue("alias"), databaseType,
-                null, null, new ColumnSegmentBoundInfo(new IdentifierValue("")));
+        ColumnProjection projection = new ColumnProjection("owner", "name", "alias", databaseType);
+        projection.setOriginalTable(new IdentifierValue(""));
         assertThat(projection.getOriginalTable(), is(new IdentifierValue("owner")));
     }
     
     @Test
     void assertGetOriginalTable() {
-        ColumnProjection projection = new ColumnProjection(new IdentifierValue("owner"), new IdentifierValue("name"), new IdentifierValue("alias"), databaseType,
-                null, null, new ColumnSegmentBoundInfo(new IdentifierValue(""), new IdentifierValue(""), new IdentifierValue("tbl"), new IdentifierValue("")));
+        ColumnProjection projection = new ColumnProjection("owner", "name", "alias", databaseType);
+        projection.setOriginalTable(new IdentifierValue("tbl"));
         assertThat(projection.getOriginalTable(), is(new IdentifierValue("tbl")));
     }
     
@@ -64,15 +63,15 @@ class ColumnProjectionTest {
     
     @Test
     void assertGetOriginalColumnWithEmptyOriginalColumn() {
-        ColumnProjection projection = new ColumnProjection(null, new IdentifierValue("name"), new IdentifierValue("alias"), databaseType,
-                null, null, new ColumnSegmentBoundInfo(new IdentifierValue("")));
+        ColumnProjection projection = new ColumnProjection(null, "name", "alias", databaseType);
+        projection.setOriginalColumn(new IdentifierValue(""));
         assertThat(projection.getOriginalColumn(), is(new IdentifierValue("name")));
     }
     
     @Test
     void assertGetOriginalColumn() {
-        ColumnProjection projection = new ColumnProjection(null, new IdentifierValue("name"), new IdentifierValue("alias"),
-                databaseType, null, null, new ColumnSegmentBoundInfo(new IdentifierValue("col")));
+        ColumnProjection projection = new ColumnProjection(null, "name", "alias", databaseType);
+        projection.setOriginalColumn(new IdentifierValue("col"));
         assertThat(projection.getOriginalColumn(), is(new IdentifierValue("col")));
     }
     

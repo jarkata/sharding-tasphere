@@ -37,11 +37,14 @@ import org.apache.shardingsphere.infra.yaml.config.swapper.rule.YamlRuleConfigur
 import org.apache.shardingsphere.mode.repository.standalone.jdbc.props.JDBCRepositoryPropertyKey;
 import org.apache.shardingsphere.sharding.yaml.config.YamlShardingRuleConfiguration;
 import org.apache.shardingsphere.sharding.yaml.swapper.ShardingRuleConfigurationConverter;
+import org.apache.shardingsphere.single.constant.SingleTableConstants;
+import org.apache.shardingsphere.single.yaml.config.YamlSingleRuleConfiguration;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -58,6 +61,7 @@ public final class ShardingSpherePipelineDataSourceCreator implements PipelineDa
     public DataSource create(final Object dataSourceConfig) throws SQLException {
         YamlRootConfiguration yamlRootConfig = YamlEngine.unmarshal(YamlEngine.marshal(dataSourceConfig), YamlRootConfiguration.class);
         removeAuthorityRuleConfiguration(yamlRootConfig);
+        updateSingleRuleConfiguration(yamlRootConfig);
         updateConfigurationProperties(yamlRootConfig);
         updateShardingRuleConfiguration(yamlRootConfig);
         yamlRootConfig.setMode(createStandaloneModeConfiguration());
@@ -66,6 +70,16 @@ public final class ShardingSpherePipelineDataSourceCreator implements PipelineDa
     
     private void removeAuthorityRuleConfiguration(final YamlRootConfiguration yamlRootConfig) {
         yamlRootConfig.getRules().removeIf(YamlAuthorityRuleConfiguration.class::isInstance);
+    }
+    
+    private void updateSingleRuleConfiguration(final YamlRootConfiguration yamlRootConfig) {
+        Optional<YamlSingleRuleConfiguration> originalSingleRuleConfig =
+                yamlRootConfig.getRules().stream().filter(YamlSingleRuleConfiguration.class::isInstance).map(YamlSingleRuleConfiguration.class::cast).findFirst();
+        yamlRootConfig.getRules().removeIf(YamlSingleRuleConfiguration.class::isInstance);
+        YamlSingleRuleConfiguration singleRuleConfig = new YamlSingleRuleConfiguration();
+        singleRuleConfig.setTables(Collections.singletonList(SingleTableConstants.ALL_TABLES));
+        originalSingleRuleConfig.ifPresent(optional -> singleRuleConfig.setDefaultDataSource(optional.getDefaultDataSource()));
+        yamlRootConfig.getRules().add(singleRuleConfig);
     }
     
     private void updateConfigurationProperties(final YamlRootConfiguration yamlRootConfig) {

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.apache.shardingsphere</groupId>
         <artifactId>shardingsphere-parser-sql</artifactId>
-        <version>5.5.2-SNAPSHOT</version>
+        <version>5.5.1</version>
     </parent>
     <artifactId>shardingsphere-parser-sql-dialect</artifactId>
     <packaging>pom</packaging>
@@ -30,14 +30,13 @@
         <module>sql92</module>
         <module>postgresql</module>
         <module>mysql</module>
-<!--        <module>oracle</module>-->
+        <module>oracle</module>
         <module>sqlserver</module>
         <module>opengauss</module>
         <module>clickhouse</module>
         <module>doris</module>
         <module>hive</module>
         <module>presto</module>
-        <module>firebird</module>
     </modules>
     
     <dependencies>
@@ -66,6 +65,23 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>antlr4-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>antlr</id>
+                                <goals>
+                                    <goal>antlr4</goal>
+                                </goals>
+                                <configuration>
+                                    <libDirectory>src/main/antlr4/imports/${dialect.parser}/</libDirectory>
+                                    <listener>false</listener>
+                                    <visitor>true</visitor>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

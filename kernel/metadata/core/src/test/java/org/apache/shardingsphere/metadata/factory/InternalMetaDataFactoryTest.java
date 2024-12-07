@@ -43,14 +43,12 @@ class InternalMetaDataFactoryTest {
     
     @Test
     void assertCreateWithDatabaseName() {
-        MetaDataPersistService persistService = mock(MetaDataPersistService.class, RETURNS_DEEP_STUBS);
-        when(persistService.getDatabaseMetaDataFacade().getSchema().load("foo_db")).thenReturn(Collections.emptyList());
-        ShardingSphereDatabase database = InternalMetaDataFactory.create(
-                "foo_db", persistService, mock(DatabaseConfiguration.class), new ConfigurationProperties(new Properties()), mock(ComputeNodeInstanceContext.class));
+        ShardingSphereDatabase database = InternalMetaDataFactory.create("foo_db",
+                mock(MetaDataPersistService.class, RETURNS_DEEP_STUBS), mock(DatabaseConfiguration.class), new ConfigurationProperties(new Properties()), mock(ComputeNodeInstanceContext.class));
         assertThat(database.getName(), is("foo_db"));
         assertThat(database.getProtocolType(), is(TypedSPILoader.getService(DatabaseType.class, "MySQL")));
         assertTrue(database.getRuleMetaData().getRules().isEmpty());
-        assertTrue(database.getAllSchemas().isEmpty());
+        assertTrue(database.getSchemas().isEmpty());
     }
     
     @Test
@@ -61,23 +59,21 @@ class InternalMetaDataFactoryTest {
         assertThat(databases.get("foo_db").getName(), is("foo_db"));
         assertThat(databases.get("foo_db").getProtocolType(), is(TypedSPILoader.getService(DatabaseType.class, "MySQL")));
         assertTrue(databases.get("foo_db").getRuleMetaData().getRules().isEmpty());
-        assertTrue(databases.get("foo_db").getAllSchemas().isEmpty());
+        assertTrue(databases.get("foo_db").getSchemas().isEmpty());
     }
     
     @Test
     void assertCreateWithDatabasesWithStorageUnits() {
-        MetaDataPersistService persistService = mock(MetaDataPersistService.class, RETURNS_DEEP_STUBS);
-        when(persistService.getDatabaseMetaDataFacade().getSchema().load("foo_db")).thenReturn(Collections.emptyList());
         DatabaseConfiguration databaseConfig = mock(DatabaseConfiguration.class);
         StorageUnit storageUnit = mock(StorageUnit.class);
         when(storageUnit.getDataSource()).thenReturn(new MockedDataSource());
         when(databaseConfig.getStorageUnits()).thenReturn(Collections.singletonMap("foo_ds", storageUnit));
-        Map<String, ShardingSphereDatabase> databases = InternalMetaDataFactory.create(
-                persistService, Collections.singletonMap("foo_db", databaseConfig), new ConfigurationProperties(new Properties()), mock(ComputeNodeInstanceContext.class));
+        Map<String, ShardingSphereDatabase> databases = InternalMetaDataFactory.create(mock(MetaDataPersistService.class, RETURNS_DEEP_STUBS),
+                Collections.singletonMap("foo_db", databaseConfig), new ConfigurationProperties(new Properties()), mock(ComputeNodeInstanceContext.class));
         assertThat(databases.size(), is(1));
         assertThat(databases.get("foo_db").getName(), is("foo_db"));
         assertThat(databases.get("foo_db").getProtocolType(), is(TypedSPILoader.getService(DatabaseType.class, "FIXTURE")));
         assertTrue(databases.get("foo_db").getRuleMetaData().getRules().isEmpty());
-        assertTrue(databases.get("foo_db").getAllSchemas().isEmpty());
+        assertTrue(databases.get("foo_db").getSchemas().isEmpty());
     }
 }

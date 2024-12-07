@@ -19,13 +19,12 @@ package org.apache.shardingsphere.encrypt.rewrite.token.generator.assignment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.aware.DatabaseAware;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseNameAware;
 import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.UpdateStatementContext;
 import org.apache.shardingsphere.infra.binder.context.type.TableAvailable;
-import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.CollectionSQLTokenGenerator;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.SQLToken;
 
@@ -37,21 +36,21 @@ import java.util.Collection;
 @HighFrequencyInvocation
 @RequiredArgsConstructor
 @Setter
-public final class EncryptUpdateAssignmentTokenGenerator implements CollectionSQLTokenGenerator<UpdateStatementContext>, DatabaseAware {
+public final class EncryptUpdateAssignmentTokenGenerator implements CollectionSQLTokenGenerator<UpdateStatementContext>, DatabaseNameAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
-    private ShardingSphereDatabase database;
+    private String databaseName;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
         return sqlStatementContext instanceof UpdateStatementContext
-                && rule.findEncryptTable(((TableAvailable) sqlStatementContext).getTablesContext().getSimpleTables().iterator().next().getTableName().getIdentifier().getValue()).isPresent();
+                && encryptRule.findEncryptTable(((TableAvailable) sqlStatementContext).getTablesContext().getSimpleTables().iterator().next().getTableName().getIdentifier().getValue()).isPresent();
     }
     
     @Override
     public Collection<SQLToken> generateSQLTokens(final UpdateStatementContext sqlStatementContext) {
-        return new EncryptAssignmentTokenGenerator(rule, database.getName(), sqlStatementContext.getDatabaseType())
+        return new EncryptAssignmentTokenGenerator(encryptRule, databaseName, sqlStatementContext.getDatabaseType())
                 .generateSQLTokens(sqlStatementContext.getTablesContext(), sqlStatementContext.getSqlStatement().getSetAssignment());
     }
 }

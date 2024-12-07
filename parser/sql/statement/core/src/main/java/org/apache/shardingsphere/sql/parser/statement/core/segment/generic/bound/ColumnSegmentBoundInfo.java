@@ -18,11 +18,13 @@
 package org.apache.shardingsphere.sql.parser.statement.core.segment.generic.bound;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.IdentifierValue;
 
 /**
  * Column segment bound info.
  */
+@RequiredArgsConstructor
 @Getter
 public final class ColumnSegmentBoundInfo {
     
@@ -35,13 +37,9 @@ public final class ColumnSegmentBoundInfo {
     private final IdentifierValue originalColumn;
     
     public ColumnSegmentBoundInfo(final IdentifierValue originalColumn) {
-        this(null, null, null, originalColumn);
-    }
-    
-    public ColumnSegmentBoundInfo(final IdentifierValue originalDatabase, final IdentifierValue originalSchema, final IdentifierValue originalTable, final IdentifierValue originalColumn) {
-        this.originalDatabase = null == originalDatabase ? new IdentifierValue("") : originalDatabase;
-        this.originalSchema = null == originalSchema ? new IdentifierValue("") : originalSchema;
-        this.originalTable = null == originalTable ? new IdentifierValue("") : originalTable;
-        this.originalColumn = null == originalColumn ? new IdentifierValue("") : originalColumn;
+        originalDatabase = new IdentifierValue("");
+        originalSchema = new IdentifierValue("");
+        originalTable = new IdentifierValue("");
+        this.originalColumn = originalColumn;
     }
 }

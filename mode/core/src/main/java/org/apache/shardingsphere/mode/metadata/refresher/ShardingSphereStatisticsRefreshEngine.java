@@ -102,7 +102,8 @@ public final class ShardingSphereStatisticsRefreshEngine {
         }
     }
     
-    private void collectForDatabase(final String databaseName, final ShardingSphereDatabaseData databaseData, final ShardingSphereMetaData metaData, final ShardingSphereStatistics statistics) {
+    private void collectForDatabase(final String databaseName, final ShardingSphereDatabaseData databaseData,
+                                    final ShardingSphereMetaData metaData, final ShardingSphereStatistics statistics) {
         for (Entry<String, ShardingSphereSchemaData> entry : databaseData.getSchemaData().entrySet()) {
             if (metaData.getDatabase(databaseName).containsSchema(entry.getKey())) {
                 collectForSchema(databaseName, entry.getKey(), entry.getValue(), metaData, statistics);
@@ -121,11 +122,11 @@ public final class ShardingSphereStatisticsRefreshEngine {
     
     private void collectForTable(final String databaseName, final String schemaName, final ShardingSphereTable table,
                                  final ShardingSphereMetaData metaData, final ShardingSphereStatistics statistics) {
-        Optional<ShardingSphereStatisticsCollector> statisticsCollector = TypedSPILoader.findService(ShardingSphereStatisticsCollector.class, table.getName());
+        Optional<ShardingSphereStatisticsCollector> dataCollector = TypedSPILoader.findService(ShardingSphereStatisticsCollector.class, table.getName());
         Optional<ShardingSphereTableData> tableData = Optional.empty();
-        if (statisticsCollector.isPresent()) {
+        if (dataCollector.isPresent()) {
             try {
-                tableData = statisticsCollector.get().collect(databaseName, table, metaData);
+                tableData = dataCollector.get().collect(databaseName, table, metaData.getDatabases(), contextManager.getMetaDataContexts().getMetaData().getGlobalRuleMetaData());
                 // CHECKSTYLE:OFF
             } catch (final Exception ex) {
                 // CHECKSTYLE:ON
@@ -181,7 +182,7 @@ public final class ShardingSphereStatisticsRefreshEngine {
         AlteredShardingSphereDatabaseData result = new AlteredShardingSphereDatabaseData(databaseName, schemaName, tableData.getName());
         Map<String, ShardingSphereRowData> tableDataMap = tableData.getRows().stream().collect(Collectors.toMap(ShardingSphereRowData::getUniqueKey, Function.identity()));
         Map<String, ShardingSphereRowData> changedTableDataMap = changedTableData.getRows().stream().collect(Collectors.toMap(ShardingSphereRowData::getUniqueKey, Function.identity()));
-        YamlShardingSphereRowDataSwapper swapper = new YamlShardingSphereRowDataSwapper(new ArrayList<>(table.getAllColumns()));
+        YamlShardingSphereRowDataSwapper swapper = new YamlShardingSphereRowDataSwapper(new ArrayList<>(table.getColumnValues()));
         for (Entry<String, ShardingSphereRowData> entry : changedTableDataMap.entrySet()) {
             if (!tableDataMap.containsKey(entry.getKey())) {
                 result.getAddedRows().add(swapper.swapToYamlConfiguration(entry.getValue()));

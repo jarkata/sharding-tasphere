@@ -33,6 +33,7 @@ import org.apache.shardingsphere.data.pipeline.cdc.engine.CDCJobRunnerCleaner;
 import org.apache.shardingsphere.data.pipeline.cdc.generator.CDCResponseUtils;
 import org.apache.shardingsphere.data.pipeline.core.context.PipelineContextKey;
 import org.apache.shardingsphere.data.pipeline.core.context.PipelineJobItemContext;
+import org.apache.shardingsphere.data.pipeline.core.context.TransmissionJobItemContext;
 import org.apache.shardingsphere.data.pipeline.core.context.TransmissionProcessContext;
 import org.apache.shardingsphere.data.pipeline.core.datanode.JobDataNodeLine;
 import org.apache.shardingsphere.data.pipeline.core.datanode.JobDataNodeLineConvertUtils;
@@ -182,7 +183,7 @@ public final class CDCJob implements PipelineJob {
         Collection<CompletableFuture<?>> futures = new LinkedList<>();
         for (CDCJobItemContext each : jobItemContexts) {
             updateJobItemStatus(each, JobStatus.EXECUTE_INVENTORY_TASK, jobItemManager);
-            for (PipelineTask task : each.getInventoryTasks()) {
+            for (PipelineTask task : ((TransmissionJobItemContext) each).getInventoryTasks()) {
                 if (task.getTaskProgress().getPosition() instanceof IngestFinishedPosition) {
                     continue;
                 }
@@ -203,7 +204,7 @@ public final class CDCJob implements PipelineJob {
                 return;
             }
             updateJobItemStatus(each, JobStatus.EXECUTE_INCREMENTAL_TASK, jobItemManager);
-            for (PipelineTask task : each.getIncrementalTasks()) {
+            for (PipelineTask task : ((TransmissionJobItemContext) each).getIncrementalTasks()) {
                 if (task.getTaskProgress().getPosition() instanceof IngestFinishedPosition) {
                     continue;
                 }

@@ -26,4 +26,5 @@ authority:
   privilege:
     type: ALL_PERMITTED
 props:
+  sql-show: false
   proxy-frontend-database-protocol-type: PostgreSQL

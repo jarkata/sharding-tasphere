@@ -49,11 +49,13 @@
 </table>
 
 ### 概述
+
 <hr>
 基于ShardingSphere构建，主要目的如下:
-* 1-学习源代码
-* 2-按照自己的使用场景精简代码
-* 3-按照自己的习惯及场景补充新的功能
+
+1-学习源代码
+2-按照自己的使用场景精简代码
+3-按照自己的习惯及场景补充新的功能
 <hr>
 
 Apache ShardingSphere 产品定位为 `Database Plus`，旨在构建异构数据库上层的标准和生态。
@@ -67,7 +69,7 @@ Apache ShardingSphere 产品定位为 `Database Plus`，旨在构建异构数据
 
 ShardingSphere 已于 2020 年 4 月 16 日成为 [Apache 软件基金会](https://apache.org/index.html#projects-list)的顶级项目。
 
-迄今为止，已有超过 [15,000 个 GitHub 项目](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code)采用了 ShardingSphere。
+迄今为止，已有超过 [10,000 个 GitHub 项目](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code)采用了 ShardingSphere。
 
 ### 文档📜
 

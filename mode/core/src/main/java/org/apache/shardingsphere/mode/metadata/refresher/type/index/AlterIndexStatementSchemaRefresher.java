@@ -31,7 +31,6 @@ import org.apache.shardingsphere.sql.parser.statement.core.segment.ddl.index.Ind
 import org.apache.shardingsphere.sql.parser.statement.core.statement.ddl.AlterIndexStatement;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Optional;
 
 /**
@@ -55,18 +54,18 @@ public final class AlterIndexStatementSchemaRefresher implements MetaDataRefresh
         ShardingSphereTable newTable = newShardingSphereTable(table);
         newTable.removeIndex(indexName);
         String renameIndexName = renameIndex.get().getIndexName().getIdentifier().getValue();
-        newTable.putIndex(new ShardingSphereIndex(renameIndexName, new LinkedList<>(), false));
+        newTable.putIndex(new ShardingSphereIndex(renameIndexName));
         AlterSchemaMetaDataPOJO alterSchemaMetaDataPOJO = new AlterSchemaMetaDataPOJO(database.getName(), actualSchemaName);
         alterSchemaMetaDataPOJO.getAlteredTables().add(newTable);
         metaDataManagerPersistService.alterSchemaMetaData(alterSchemaMetaDataPOJO);
     }
     
     private Optional<String> findLogicTableName(final ShardingSphereSchema schema, final String indexName) {
-        return schema.getAllTables().stream().filter(each -> each.containsIndex(indexName)).findFirst().map(ShardingSphereTable::getName);
+        return schema.getAllTableNames().stream().filter(each -> schema.getTable(each).containsIndex(indexName)).findFirst();
     }
     
     private ShardingSphereTable newShardingSphereTable(final ShardingSphereTable table) {
-        ShardingSphereTable result = new ShardingSphereTable(table.getName(), table.getAllColumns(), table.getAllIndexes(), table.getAllConstraints(), table.getType());
+        ShardingSphereTable result = new ShardingSphereTable(table.getName(), table.getColumnValues(), table.getIndexValues(), table.getConstraintValues(), table.getType());
         result.getColumnNames().addAll(table.getColumnNames());
         result.getVisibleColumns().addAll(table.getVisibleColumns());
         result.getPrimaryKeyColumns().addAll(table.getPrimaryKeyColumns());

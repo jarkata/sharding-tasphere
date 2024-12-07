@@ -38,9 +38,4 @@ public abstract class GeneratedKeyAssignmentToken extends SQLToken implements At
     }
     
     protected abstract String getRightValue();
-    
-    @Override
-    public int getStopIndex() {
-        return getStartIndex();
-    }
 }

@@ -107,8 +107,11 @@ class AlterEncryptRuleExecutorTest {
     }
     
     private ContextManager mockContextManager(final EncryptRule rule) {
+        ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
+        when(database.getName()).thenReturn("foo_db");
+        when(database.getRuleMetaData()).thenReturn(new RuleMetaData(Collections.singleton(rule)));
         ContextManager result = mock(ContextManager.class, RETURNS_DEEP_STUBS);
-        when(result.getDatabase("foo_db")).thenReturn(new ShardingSphereDatabase("foo_db", mock(), mock(), new RuleMetaData(Collections.singleton(rule)), Collections.emptyList()));
+        when(result.getDatabase("foo_db")).thenReturn(database);
         return result;
     }
     

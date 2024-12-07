@@ -23,6 +23,7 @@ import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.InsertStatementContext;
+import org.apache.shardingsphere.infra.binder.context.type.WhereAvailable;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereSchema;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.CollectionSQLTokenGenerator;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.aware.SchemaMetaDataAware;
@@ -39,7 +40,7 @@ import java.util.Map;
 @Setter
 public final class EncryptInsertPredicateColumnTokenGenerator implements CollectionSQLTokenGenerator<SQLStatementContext>, SchemaMetaDataAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
     private Map<String, ShardingSphereSchema> schemas;
     
@@ -48,12 +49,12 @@ public final class EncryptInsertPredicateColumnTokenGenerator implements Collect
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
         return sqlStatementContext instanceof InsertStatementContext && null != ((InsertStatementContext) sqlStatementContext).getInsertSelectContext()
-                && !((InsertStatementContext) sqlStatementContext).getInsertSelectContext().getSelectStatementContext().getWhereSegments().isEmpty();
+                && !((WhereAvailable) ((InsertStatementContext) sqlStatementContext).getInsertSelectContext().getSelectStatementContext()).getWhereSegments().isEmpty();
     }
     
     @Override
     public Collection<SQLToken> generateSQLTokens(final SQLStatementContext sqlStatementContext) {
-        EncryptPredicateColumnTokenGenerator generator = new EncryptPredicateColumnTokenGenerator(rule);
+        EncryptPredicateColumnTokenGenerator generator = new EncryptPredicateColumnTokenGenerator(encryptRule);
         generator.setSchemas(schemas);
         generator.setDefaultSchema(defaultSchema);
         return generator.generateSQLTokens(((InsertStatementContext) sqlStatementContext).getInsertSelectContext().getSelectStatementContext());

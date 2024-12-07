@@ -50,7 +50,8 @@ public final class EncryptIndexReviser implements IndexReviser<EncryptRule> {
                 columns.add(each);
             }
         }
-        IndexMetaData result = new IndexMetaData(originalMetaData.getName(), columns);
+        IndexMetaData result = new IndexMetaData(originalMetaData.getName());
+        result.getColumns().addAll(columns);
         result.setUnique(originalMetaData.isUnique());
         return Optional.of(result);
     }

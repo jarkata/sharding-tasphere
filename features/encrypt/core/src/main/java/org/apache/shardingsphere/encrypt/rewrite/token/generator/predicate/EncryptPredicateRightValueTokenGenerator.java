@@ -20,10 +20,9 @@ package org.apache.shardingsphere.encrypt.rewrite.token.generator.predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.shardingsphere.encrypt.exception.metadata.MissingMatchedEncryptQueryAlgorithmException;
-import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.aware.DatabaseAware;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseNameAware;
 import org.apache.shardingsphere.encrypt.rewrite.aware.EncryptConditionsAware;
 import org.apache.shardingsphere.encrypt.rewrite.condition.EncryptCondition;
-import org.apache.shardingsphere.encrypt.rewrite.condition.EncryptConditionValues;
 import org.apache.shardingsphere.encrypt.rewrite.condition.impl.EncryptBinaryCondition;
 import org.apache.shardingsphere.encrypt.rewrite.condition.impl.EncryptInCondition;
 import org.apache.shardingsphere.encrypt.rewrite.token.pojo.EncryptPredicateEqualRightValueToken;
@@ -38,7 +37,6 @@ import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementCont
 import org.apache.shardingsphere.infra.binder.context.type.TableAvailable;
 import org.apache.shardingsphere.infra.binder.context.type.WhereAvailable;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseTypeRegistry;
-import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.CollectionSQLTokenGenerator;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.aware.ParametersAware;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.SQLToken;
@@ -56,15 +54,15 @@ import java.util.Map;
 @HighFrequencyInvocation
 @RequiredArgsConstructor
 @Setter
-public final class EncryptPredicateRightValueTokenGenerator implements CollectionSQLTokenGenerator<SQLStatementContext>, ParametersAware, EncryptConditionsAware, DatabaseAware {
+public final class EncryptPredicateRightValueTokenGenerator implements CollectionSQLTokenGenerator<SQLStatementContext>, ParametersAware, EncryptConditionsAware, DatabaseNameAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
     private List<Object> parameters;
     
     private Collection<EncryptCondition> encryptConditions;
     
-    private ShardingSphereDatabase database;
+    private String databaseName;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -75,9 +73,9 @@ public final class EncryptPredicateRightValueTokenGenerator implements Collectio
     public Collection<SQLToken> generateSQLTokens(final SQLStatementContext sqlStatementContext) {
         Collection<SQLToken> result = new LinkedHashSet<>(encryptConditions.size(), 1F);
         String schemaName = ((TableAvailable) sqlStatementContext).getTablesContext().getSchemaName()
-                .orElseGet(() -> new DatabaseTypeRegistry(sqlStatementContext.getDatabaseType()).getDefaultSchemaName(database.getName()));
+                .orElseGet(() -> new DatabaseTypeRegistry(sqlStatementContext.getDatabaseType()).getDefaultSchemaName(databaseName));
         for (EncryptCondition each : encryptConditions) {
-            rule.findEncryptTable(each.getTableName()).ifPresent(optional -> result.add(generateSQLToken(schemaName, optional, each)));
+            encryptRule.findEncryptTable(each.getTableName()).ifPresent(optional -> result.add(generateSQLToken(schemaName, optional, each)));
         }
         return result;
     }
@@ -86,7 +84,7 @@ public final class EncryptPredicateRightValueTokenGenerator implements Collectio
         int startIndex = encryptCondition.getStartIndex();
         int stopIndex = encryptCondition.getStopIndex();
         Map<Integer, Object> indexValues = getPositionValues(
-                encryptCondition.getPositionValueMap().keySet(), getEncryptedValues(schemaName, encryptTable, encryptCondition, new EncryptConditionValues(encryptCondition).get(parameters)));
+                encryptCondition.getPositionValueMap().keySet(), getEncryptedValues(schemaName, encryptTable, encryptCondition, encryptCondition.getValues(parameters)));
         Collection<Integer> parameterMarkerIndexes = encryptCondition.getPositionIndexMap().keySet();
         if (encryptCondition instanceof EncryptBinaryCondition && ((EncryptBinaryCondition) encryptCondition).getExpressionSegment() instanceof FunctionSegment) {
             FunctionSegment functionSegment = (FunctionSegment) ((EncryptBinaryCondition) encryptCondition).getExpressionSegment();
@@ -102,11 +100,11 @@ public final class EncryptPredicateRightValueTokenGenerator implements Collectio
         if (encryptCondition instanceof EncryptBinaryCondition && "LIKE".equalsIgnoreCase(((EncryptBinaryCondition) encryptCondition).getOperator())) {
             LikeQueryColumnItem likeQueryColumnItem = encryptColumn.getLikeQuery()
                     .orElseThrow(() -> new MissingMatchedEncryptQueryAlgorithmException(encryptTable.getTable(), encryptCondition.getColumnName(), "LIKE"));
-            return likeQueryColumnItem.encrypt(database.getName(), schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues);
+            return likeQueryColumnItem.encrypt(databaseName, schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues);
         }
         return encryptColumn.getAssistedQuery()
-                .map(optional -> optional.encrypt(database.getName(), schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues))
-                .orElseGet(() -> encryptColumn.getCipher().encrypt(database.getName(), schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues));
+                .map(optional -> optional.encrypt(databaseName, schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues))
+                .orElseGet(() -> encryptColumn.getCipher().encrypt(databaseName, schemaName, encryptCondition.getTableName(), encryptCondition.getColumnName(), originalValues));
     }
     
     private Map<Integer, Object> getPositionValues(final Collection<Integer> valuePositions, final List<Object> encryptValues) {

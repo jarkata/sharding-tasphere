@@ -17,12 +17,10 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.expression.type;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.type.SimpleTableSegmentBinderContext;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereColumn;
@@ -45,6 +43,8 @@ import org.junit.jupiter.api.Test;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,13 +69,12 @@ class SubquerySegmentBinderTest {
         mysqlSelectStatement.setWhere(new WhereSegment(80, 102, whereExpressionSegment));
         SubquerySegment subquerySegment = new SubquerySegment(39, 103, mysqlSelectStatement, "order_id = (SELECT order_id FROM t_order WHERE status = 'SUBMIT')");
         SQLStatementBinderContext sqlStatementBinderContext = new SQLStatementBinderContext(
-                createMetaData(), "foo_db", TypedSPILoader.getService(DatabaseType.class, "FIXTURE"), Collections.emptySet());
+                createMetaData(), DefaultDatabase.LOGIC_NAME, TypedSPILoader.getService(DatabaseType.class, "FIXTURE"), Collections.emptySet());
         ColumnSegment boundNameColumn = new ColumnSegment(7, 13, new IdentifierValue("user_id"));
         boundNameColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(
-                new IdentifierValue("foo_db"), new IdentifierValue("foo_db"), new IdentifierValue("t_order_item"), new IdentifierValue("user_id")));
-        sqlStatementBinderContext.getExternalTableBinderContexts().put(new CaseInsensitiveString("t_order_item"),
-                new SimpleTableSegmentBinderContext(Collections.singleton(new ColumnProjectionSegment(boundNameColumn))));
-        Multimap<CaseInsensitiveString, TableSegmentBinderContext> outerTableBinderContexts = LinkedHashMultimap.create();
+                new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("t_order_item"), new IdentifierValue("user_id")));
+        sqlStatementBinderContext.getExternalTableBinderContexts().put("t_order_item", new SimpleTableSegmentBinderContext(Collections.singleton(new ColumnProjectionSegment(boundNameColumn))));
+        Map<String, TableSegmentBinderContext> outerTableBinderContexts = new LinkedHashMap<>();
         SubquerySegment actual = SubquerySegmentBinder.bind(subquerySegment, sqlStatementBinderContext, outerTableBinderContexts);
         assertNotNull(actual.getSelect());
         assertTrue(actual.getSelect().getFrom().isPresent());
@@ -87,8 +86,8 @@ class SubquerySegmentBinderTest {
         assertNotNull(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo());
         assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalColumn().getValue(), is("status"));
         assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalTable().getValue(), is("t_order"));
-        assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalSchema().getValue(), is("foo_db"));
-        assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalDatabase().getValue(), is("foo_db"));
+        assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalSchema().getValue(), is(DefaultDatabase.LOGIC_NAME));
+        assertThat(((ColumnSegment) actual.getSelect().getWhere().get().getExpr()).getColumnBoundInfo().getOriginalDatabase().getValue(), is(DefaultDatabase.LOGIC_NAME));
         assertNotNull(actual.getSelect().getProjections());
         assertThat(actual.getSelect().getProjections().getProjections().size(), is(1));
         ProjectionSegment column = actual.getSelect().getProjections().getProjections().iterator().next();
@@ -97,21 +96,21 @@ class SubquerySegmentBinderTest {
         assertNotNull(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo());
         assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalColumn().getValue(), is("order_id"));
         assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalTable().getValue(), is("t_order"));
-        assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalSchema().getValue(), is("foo_db"));
-        assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalDatabase().getValue(), is("foo_db"));
+        assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalSchema().getValue(), is(DefaultDatabase.LOGIC_NAME));
+        assertThat(((ColumnProjectionSegment) column).getColumn().getColumnBoundInfo().getOriginalDatabase().getValue(), is(DefaultDatabase.LOGIC_NAME));
     }
     
     private ShardingSphereMetaData createMetaData() {
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class, RETURNS_DEEP_STUBS);
-        when(schema.getTable("t_order").getAllColumns()).thenReturn(Arrays.asList(
+        when(schema.getTable("t_order").getColumnValues()).thenReturn(Arrays.asList(
                 new ShardingSphereColumn("order_id", Types.INTEGER, true, false, false, true, false, false),
                 new ShardingSphereColumn("user_id", Types.INTEGER, false, false, false, true, false, false),
                 new ShardingSphereColumn("status", Types.INTEGER, false, false, false, true, false, false)));
         ShardingSphereMetaData result = mock(ShardingSphereMetaData.class, RETURNS_DEEP_STUBS);
-        when(result.getDatabase("foo_db").getSchema("foo_db")).thenReturn(schema);
-        when(result.containsDatabase("foo_db")).thenReturn(true);
-        when(result.getDatabase("foo_db").containsSchema("foo_db")).thenReturn(true);
-        when(result.getDatabase("foo_db").getSchema("foo_db").containsTable("t_order")).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(schema);
+        when(result.containsDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).containsSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).getSchema(DefaultDatabase.LOGIC_NAME).containsTable("t_order")).thenReturn(true);
         return result;
     }
 }

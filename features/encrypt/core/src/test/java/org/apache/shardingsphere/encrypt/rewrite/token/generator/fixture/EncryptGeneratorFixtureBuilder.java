@@ -26,9 +26,12 @@ import org.apache.shardingsphere.encrypt.config.rule.EncryptTableRuleConfigurati
 import org.apache.shardingsphere.encrypt.rewrite.token.pojo.EncryptInsertValuesToken;
 import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.infra.algorithm.core.config.AlgorithmConfiguration;
+import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.InsertStatementContext;
+import org.apache.shardingsphere.infra.binder.context.statement.dml.SelectStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.UpdateStatementContext;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.metadata.database.resource.ResourceMetaData;
@@ -105,13 +108,15 @@ public final class EncryptGeneratorFixtureBuilder {
      * @return created insert statement context
      */
     public static InsertStatementContext createInsertStatementContext(final List<Object> params) {
+        InsertStatement insertStatement = createInsertStatement();
         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-        when(database.getName()).thenReturn("foo_db");
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
-        when(schema.getAllColumnNames("foo_tbl")).thenReturn(Arrays.asList("id", "name", "status", "pwd"));
-        when(database.getSchema("foo_db")).thenReturn(schema);
-        ShardingSphereMetaData metaData = new ShardingSphereMetaData(Collections.singleton(database), mock(ResourceMetaData.class), mock(RuleMetaData.class), mock(ConfigurationProperties.class));
-        return new InsertStatementContext(metaData, params, createInsertStatement(), "foo_db");
+        when(database.getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(schema);
+        when(schema.getAllColumnNames("tbl")).thenReturn(Arrays.asList("id", "name", "status", "pwd"));
+        ShardingSphereMetaData metaData = new ShardingSphereMetaData(
+                Collections.singletonMap(DefaultDatabase.LOGIC_NAME, database), mock(ResourceMetaData.class),
+                mock(RuleMetaData.class), mock(ConfigurationProperties.class));
+        return new InsertStatementContext(metaData, params, insertStatement, DefaultDatabase.LOGIC_NAME);
     }
     
     private static InsertStatement createInsertStatement() {
@@ -129,10 +134,10 @@ public final class EncryptGeneratorFixtureBuilder {
         InsertStatement result = new MySQLInsertStatement();
         result.setTable(new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("t_user"))));
         ColumnSegment userIdColumn = new ColumnSegment(0, 0, new IdentifierValue("user_id"));
-        userIdColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue("foo_db"), new IdentifierValue("foo_db"), new IdentifierValue("t_user"),
+        userIdColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("t_user"),
                 new IdentifierValue("user_id")));
         ColumnSegment userNameColumn = new ColumnSegment(0, 0, new IdentifierValue("user_name"));
-        userNameColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue("foo_db"), new IdentifierValue("foo_db"),
+        userNameColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME),
                 new IdentifierValue("t_user"), new IdentifierValue("user_name")));
         List<ColumnSegment> insertColumns = Arrays.asList(userIdColumn, userNameColumn);
         if (containsInsertColumns) {
@@ -146,7 +151,7 @@ public final class EncryptGeneratorFixtureBuilder {
         ProjectionsSegment projections = new ProjectionsSegment(0, 0);
         projections.getProjections().add(new ColumnProjectionSegment(userIdColumn));
         ColumnSegment statusColumn = new ColumnSegment(0, 0, new IdentifierValue("status"));
-        statusColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue("foo_db"), new IdentifierValue("foo_db"), new IdentifierValue("t_user"),
+        statusColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("t_user"),
                 new IdentifierValue("status")));
         projections.getProjections().add(new ColumnProjectionSegment(statusColumn));
         selectStatement.setProjections(projections);
@@ -164,7 +169,7 @@ public final class EncryptGeneratorFixtureBuilder {
         updateStatement.setTable(new SimpleTableSegment(new TableNameSegment(0, 0, new IdentifierValue("t_user"))));
         updateStatement.setWhere(createWhereSegment());
         updateStatement.setSetAssignment(createSetAssignmentSegment());
-        return new UpdateStatementContext(updateStatement, "foo_db");
+        return new UpdateStatementContext(updateStatement, DefaultDatabase.LOGIC_NAME);
     }
     
     private static WhereSegment createWhereSegment() {
@@ -201,6 +206,23 @@ public final class EncryptGeneratorFixtureBuilder {
     }
     
     /**
+     * Create select statement context.
+     *
+     * @return select statement context
+     */
+    public static SQLStatementContext createSelectStatementContext() {
+        ColumnSegment leftColumn = new ColumnSegment(0, 0, new IdentifierValue("user_name"));
+        leftColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("t_user"),
+                new IdentifierValue("user_name")));
+        ColumnSegment rightColumn = new ColumnSegment(0, 0, new IdentifierValue("user_id"));
+        rightColumn.setColumnBoundInfo(new ColumnSegmentBoundInfo(new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue(DefaultDatabase.LOGIC_NAME), new IdentifierValue("t_user"),
+                new IdentifierValue("user_id")));
+        SelectStatementContext result = mock(SelectStatementContext.class);
+        when(result.getJoinConditions()).thenReturn(Collections.singleton(new BinaryOperationExpression(0, 0, leftColumn, rightColumn, "=", "")));
+        return result;
+    }
+    
+    /**
      * Create insert select statement context.
      *
      * @param params parameters
@@ -208,12 +230,14 @@ public final class EncryptGeneratorFixtureBuilder {
      * @return created insert select statement context
      */
     public static InsertStatementContext createInsertSelectStatementContext(final List<Object> params, final boolean containsInsertColumns) {
+        InsertStatement insertStatement = createInsertSelectStatement(containsInsertColumns);
         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-        when(database.getName()).thenReturn("foo_db");
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
+        when(database.getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(schema);
         when(schema.getAllColumnNames("t_user")).thenReturn(Arrays.asList("user_id", "user_name", "pwd"));
-        when(database.getSchema("foo_db")).thenReturn(schema);
-        ShardingSphereMetaData metaData = new ShardingSphereMetaData(Collections.singleton(database), mock(ResourceMetaData.class), mock(RuleMetaData.class), mock(ConfigurationProperties.class));
-        return new InsertStatementContext(metaData, params, createInsertSelectStatement(containsInsertColumns), "foo_db");
+        ShardingSphereMetaData metaData = new ShardingSphereMetaData(
+                Collections.singletonMap(DefaultDatabase.LOGIC_NAME, database), mock(ResourceMetaData.class),
+                mock(RuleMetaData.class), mock(ConfigurationProperties.class));
+        return new InsertStatementContext(metaData, params, insertStatement, DefaultDatabase.LOGIC_NAME);
     }
 }

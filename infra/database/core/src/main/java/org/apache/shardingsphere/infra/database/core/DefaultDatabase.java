@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public final class DefaultDatabase {
     
     /**
-     * Database name.
+     * Schema name.
      */
     public static final String LOGIC_NAME = "logic_db";
 }

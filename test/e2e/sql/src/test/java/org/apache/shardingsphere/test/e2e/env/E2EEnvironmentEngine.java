@@ -19,25 +19,26 @@ package org.apache.shardingsphere.test.e2e.env;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.test.e2e.container.compose.ContainerComposer;
 import org.apache.shardingsphere.test.e2e.container.compose.ContainerComposerRegistry;
+import org.apache.shardingsphere.test.e2e.engine.TotalSuitesCountCalculator;
 import org.apache.shardingsphere.test.e2e.env.container.atomic.enums.AdapterMode;
 import org.apache.shardingsphere.test.e2e.env.container.atomic.enums.AdapterType;
 import org.apache.shardingsphere.test.e2e.env.runtime.scenario.path.ScenarioDataPath;
-import org.h2.util.ScriptReader;
-import org.h2.util.StringUtils;
+import org.h2.tools.RunScript;
 
 import javax.sql.DataSource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * E2E container composer.
@@ -46,6 +47,10 @@ import java.util.Optional;
 public final class E2EEnvironmentEngine {
     
     private static final ContainerComposerRegistry CONTAINER_COMPOSER_REGISTRY = new ContainerComposerRegistry();
+    
+    private static final int TOTAL_SUITES_COUNT = TotalSuitesCountCalculator.calculate();
+    
+    private static final AtomicInteger COMPLETED_SUITES_COUNT = new AtomicInteger(0);
     
     private static final Collection<String> INITIALIZED_SUITES = new HashSet<>();
     
@@ -68,7 +73,7 @@ public final class E2EEnvironmentEngine {
     
     @SneakyThrows({SQLException.class, IOException.class})
     private void executeLogicDatabaseInitSQLFileOnlyOnce(final String key, final String scenario, final DatabaseType databaseType, final DataSource targetDataSource) {
-        Optional<String> logicDatabaseInitSQLFile = new ScenarioDataPath(scenario).findActualDatabaseInitSQLFile("foo_db", databaseType);
+        Optional<String> logicDatabaseInitSQLFile = new ScenarioDataPath(scenario).findActualDatabaseInitSQLFile(DefaultDatabase.LOGIC_NAME, databaseType);
         if (!logicDatabaseInitSQLFile.isPresent()) {
             return;
         }
@@ -87,19 +92,7 @@ public final class E2EEnvironmentEngine {
         try (
                 Connection connection = dataSource.getConnection();
                 FileReader reader = new FileReader(logicDatabaseInitSQLFile)) {
-            Statement stat = connection.createStatement();
-            ScriptReader r = new ScriptReader(reader);
-            r.setSkipRemarks(true);
-            while (true) {
-                String sql = r.readStatement();
-                if (null == sql) {
-                    break;
-                }
-                if (StringUtils.isWhitespaceOrEmpty(sql)) {
-                    continue;
-                }
-                stat.execute(sql);
-            }
+            RunScript.execute(connection, reader);
         }
     }
 }

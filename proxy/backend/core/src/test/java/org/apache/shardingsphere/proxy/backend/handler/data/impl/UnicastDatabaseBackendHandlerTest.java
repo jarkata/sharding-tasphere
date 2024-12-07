@@ -18,14 +18,19 @@
 package org.apache.shardingsphere.proxy.backend.handler.data.impl;
 
 import lombok.SneakyThrows;
+import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
+import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.hint.HintValueContext;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.metadata.database.resource.ResourceMetaData;
+import org.apache.shardingsphere.infra.metadata.database.rule.RuleMetaData;
 import org.apache.shardingsphere.infra.session.connection.ConnectionContext;
 import org.apache.shardingsphere.infra.session.query.QueryContext;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
+import org.apache.shardingsphere.metadata.persist.MetaDataPersistService;
 import org.apache.shardingsphere.mode.manager.ContextManager;
 import org.apache.shardingsphere.mode.metadata.MetaDataContexts;
 import org.apache.shardingsphere.mode.metadata.MetaDataContextsFactory;
@@ -37,21 +42,23 @@ import org.apache.shardingsphere.proxy.backend.handler.data.DatabaseBackendHandl
 import org.apache.shardingsphere.proxy.backend.response.header.ResponseHeader;
 import org.apache.shardingsphere.proxy.backend.response.header.update.UpdateResponseHeader;
 import org.apache.shardingsphere.proxy.backend.session.ConnectionSession;
+import org.apache.shardingsphere.sql.parser.statement.core.statement.SQLStatement;
 import org.apache.shardingsphere.test.mock.AutoMockExtension;
 import org.apache.shardingsphere.test.mock.StaticMockSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.internal.configuration.plugins.Plugins;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -64,17 +71,16 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(AutoMockExtension.class)
 @StaticMockSettings(ProxyContext.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class UnicastDatabaseBackendHandlerTest {
     
     private static final String EXECUTE_SQL = "SELECT 1 FROM user WHERE id = 1";
     
     private static final String DATABASE_PATTERN = "db_%s";
     
-    private final DatabaseType databaseType = TypedSPILoader.getService(DatabaseType.class, "FIXTURE");
-    
     private UnicastDatabaseBackendHandler unicastDatabaseBackendHandler;
     
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    @Mock
     private ConnectionSession connectionSession;
     
     @Mock
@@ -86,15 +92,17 @@ class UnicastDatabaseBackendHandlerTest {
     @BeforeEach
     void setUp() throws SQLException {
         when(connectionSession.getCurrentDatabaseName()).thenReturn(String.format(DATABASE_PATTERN, 0));
-        mockDatabaseConnector(new UpdateResponseHeader(mock()));
-        unicastDatabaseBackendHandler = new UnicastDatabaseBackendHandler(
-                new QueryContext(mock(), EXECUTE_SQL, Collections.emptyList(), new HintValueContext(), mockConnectionContext(), mock()), connectionSession);
+        when(connectionSession.getDatabaseConnectionManager()).thenReturn(mock(ProxyDatabaseConnectionManager.class));
+        mockDatabaseConnector(new UpdateResponseHeader(mock(SQLStatement.class)));
+        unicastDatabaseBackendHandler =
+                new UnicastDatabaseBackendHandler(new QueryContext(mock(SQLStatementContext.class), EXECUTE_SQL, Collections.emptyList(), new HintValueContext(), mockConnectionContext(),
+                        mock(ShardingSphereMetaData.class)), connectionSession);
         setBackendHandlerFactory(unicastDatabaseBackendHandler);
     }
     
     private ConnectionContext mockConnectionContext() {
         ConnectionContext result = mock(ConnectionContext.class);
-        when(result.getCurrentDatabaseName()).thenReturn(Optional.of("foo_db"));
+        when(result.getCurrentDatabaseName()).thenReturn(Optional.of(DefaultDatabase.LOGIC_NAME));
         return result;
     }
     
@@ -105,14 +113,15 @@ class UnicastDatabaseBackendHandlerTest {
     
     @SneakyThrows(ReflectiveOperationException.class)
     private void setBackendHandlerFactory(final DatabaseBackendHandler schemaDatabaseBackendHandler) {
-        Plugins.getMemberAccessor().set(schemaDatabaseBackendHandler.getClass().getDeclaredField("databaseConnectorFactory"), schemaDatabaseBackendHandler, databaseConnectorFactory);
+        Plugins.getMemberAccessor()
+                .set(schemaDatabaseBackendHandler.getClass().getDeclaredField("databaseConnectorFactory"), schemaDatabaseBackendHandler, databaseConnectorFactory);
     }
     
     @Test
     void assertExecuteDatabaseBackendHandler() throws SQLException {
         ContextManager contextManager = mockContextManager();
         when(ProxyContext.getInstance().getContextManager()).thenReturn(contextManager);
-        ShardingSphereDatabase database = createDatabases().iterator().next();
+        ShardingSphereDatabase database = createDatabases().get("db_0");
         when(contextManager.getDatabase("db_0")).thenReturn(database);
         ResponseHeader actual = unicastDatabaseBackendHandler.execute();
         assertThat(actual, instanceOf(UpdateResponseHeader.class));
@@ -122,7 +131,7 @@ class UnicastDatabaseBackendHandlerTest {
     void assertDatabaseUsingStream() throws SQLException {
         ContextManager contextManager = mockContextManager();
         when(ProxyContext.getInstance().getContextManager()).thenReturn(contextManager);
-        ShardingSphereDatabase database = createDatabases().iterator().next();
+        ShardingSphereDatabase database = createDatabases().get("db_0");
         when(contextManager.getDatabase("db_0")).thenReturn(database);
         unicastDatabaseBackendHandler.execute();
         while (unicastDatabaseBackendHandler.next()) {
@@ -132,13 +141,20 @@ class UnicastDatabaseBackendHandlerTest {
     
     private ContextManager mockContextManager() {
         ContextManager result = mock(ContextManager.class, RETURNS_DEEP_STUBS);
-        MetaDataContexts metaDataContexts = MetaDataContextsFactory.create(mock(), new ShardingSphereMetaData(createDatabases(), mock(), mock(), mock()));
+        MetaDataContexts metaDataContexts = MetaDataContextsFactory.create(mock(MetaDataPersistService.class),
+                new ShardingSphereMetaData(createDatabases(), mock(ResourceMetaData.class), mock(RuleMetaData.class), new ConfigurationProperties(new Properties())));
         when(result.getMetaDataContexts()).thenReturn(metaDataContexts);
         return result;
     }
     
-    private Collection<ShardingSphereDatabase> createDatabases() {
-        return IntStream.range(0, 10).mapToObj(each -> new ShardingSphereDatabase(
-                String.format(DATABASE_PATTERN, each), databaseType, mock(ResourceMetaData.class, RETURNS_DEEP_STUBS), mock(), Collections.emptyList())).collect(Collectors.toList());
+    private Map<String, ShardingSphereDatabase> createDatabases() {
+        Map<String, ShardingSphereDatabase> result = new HashMap<>(10, 1F);
+        for (int i = 0; i < 10; i++) {
+            ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
+            when(database.containsDataSource()).thenReturn(true);
+            when(database.getProtocolType()).thenReturn(TypedSPILoader.getService(DatabaseType.class, "FIXTURE"));
+            result.put(String.format(DATABASE_PATTERN, i), database);
+        }
+        return result;
     }
 }

@@ -17,8 +17,6 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.expression.type;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.Multimap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
@@ -26,6 +24,8 @@ import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinde
 import org.apache.shardingsphere.infra.binder.engine.statement.dml.SelectStatementBinder;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.subquery.SubquerySegment;
 import org.apache.shardingsphere.sql.parser.statement.core.statement.dml.SelectStatement;
+
+import java.util.Map;
 
 /**
  * Subquery segment binder.
@@ -41,11 +41,12 @@ public final class SubquerySegmentBinder {
      * @param outerTableBinderContexts outer table binder contexts
      * @return bound subquery segment
      */
-    public static SubquerySegment bind(final SubquerySegment segment, final SQLStatementBinderContext binderContext,
-                                       final Multimap<CaseInsensitiveString, TableSegmentBinderContext> outerTableBinderContexts) {
+    public static SubquerySegment bind(final SubquerySegment segment, final SQLStatementBinderContext binderContext, final Map<String, TableSegmentBinderContext> outerTableBinderContexts) {
         SQLStatementBinderContext selectBinderContext = new SQLStatementBinderContext(segment.getSelect(), binderContext.getMetaData(), binderContext.getCurrentDatabaseName());
         selectBinderContext.getExternalTableBinderContexts().putAll(binderContext.getExternalTableBinderContexts());
         SelectStatement boundSelectStatement = new SelectStatementBinder(outerTableBinderContexts).bind(segment.getSelect(), selectBinderContext);
-        return new SubquerySegment(segment.getStartIndex(), segment.getStopIndex(), boundSelectStatement, segment.getText());
+        SubquerySegment result = new SubquerySegment(segment.getStartIndex(), segment.getStopIndex(), boundSelectStatement, segment.getText());
+        result.setSubqueryType(segment.getSubqueryType());
+        return result;
     }
 }

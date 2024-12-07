@@ -63,7 +63,8 @@ class ShowReadwriteSplittingRuleExecutorTest extends DistSQLDatabaseRuleQueryExe
     }
     
     private static Map<String, Object> createExportedData() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>(2, 1F);
+        result.put(ExportableConstants.EXPORT_DYNAMIC_READWRITE_SPLITTING_RULE, Collections.emptyMap());
         result.put(ExportableConstants.EXPORT_STATIC_READWRITE_SPLITTING_RULE, Collections.emptyMap());
         return result;
     }

@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.proxy.frontend.mysql.command.query.binary.prepare;
 
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereColumn;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereSchema;
@@ -28,8 +29,6 @@ import org.apache.shardingsphere.sql.parser.statement.core.statement.SQLStatemen
 import org.junit.jupiter.api.Test;
 
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -50,12 +49,12 @@ class MySQLComStmtPrepareParameterMarkerExtractorTest {
     }
     
     private ShardingSphereSchema prepareSchema() {
-        ShardingSphereTable table = new ShardingSphereTable("user", Arrays.asList(
-                new ShardingSphereColumn("id", Types.BIGINT, true, false, false, false, true, false),
-                new ShardingSphereColumn("name", Types.VARCHAR, false, false, false, false, false, false),
-                new ShardingSphereColumn("age", Types.SMALLINT, false, false, false, false, true, false)), Collections.emptyList(), Collections.emptyList());
-        ShardingSphereSchema result = new ShardingSphereSchema("foo_db");
-        result.putTable(table);
+        ShardingSphereTable table = new ShardingSphereTable();
+        table.putColumn(new ShardingSphereColumn("id", Types.BIGINT, true, false, false, false, true, false));
+        table.putColumn(new ShardingSphereColumn("name", Types.VARCHAR, false, false, false, false, false, false));
+        table.putColumn(new ShardingSphereColumn("age", Types.SMALLINT, false, false, false, false, true, false));
+        ShardingSphereSchema result = new ShardingSphereSchema(DefaultDatabase.LOGIC_NAME);
+        result.getTables().put("user", table);
         return result;
     }
 }

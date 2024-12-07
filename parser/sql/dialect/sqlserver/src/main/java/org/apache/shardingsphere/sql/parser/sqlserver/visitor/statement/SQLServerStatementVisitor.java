@@ -1545,8 +1545,8 @@ public abstract class SQLServerStatementVisitor extends SQLServerStatementBaseVi
             result.setAlias(alias);
             return projection;
         }
-        ExpressionSegment column = (ExpressionSegment) projection;
-        ExpressionProjectionSegment result = new ExpressionProjectionSegment(getStartIndexWithAlias(column, alias), getStopIndexWithAlias(column, alias), String.valueOf(column.getText()), column);
+        LiteralExpressionSegment column = (LiteralExpressionSegment) projection;
+        ExpressionProjectionSegment result = new ExpressionProjectionSegment(getStartIndexWithAlias(column, alias), getStopIndexWithAlias(column, alias), String.valueOf(column.getLiterals()), column);
         result.setAlias(alias);
         return result;
     }

@@ -17,9 +17,6 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.expression.type;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.SegmentType;
@@ -28,6 +25,9 @@ import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableS
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.ExpressionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.NotExpression;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Not expression binder.
@@ -45,8 +45,8 @@ public final class NotExpressionBinder {
      * @return bound not expression
      */
     public static NotExpression bind(final NotExpression segment, final SegmentType parentSegmentType,
-                                     final SQLStatementBinderContext binderContext, final Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts) {
-        ExpressionSegment boundExpression = ExpressionSegmentBinder.bind(segment.getExpression(), parentSegmentType, binderContext, tableBinderContexts, LinkedHashMultimap.create());
+                                     final SQLStatementBinderContext binderContext, final Map<String, TableSegmentBinderContext> tableBinderContexts) {
+        ExpressionSegment boundExpression = ExpressionSegmentBinder.bind(segment.getExpression(), parentSegmentType, binderContext, tableBinderContexts, Collections.emptyMap());
         return new NotExpression(segment.getStartIndex(), segment.getStopIndex(), boundExpression, segment.getNotSign());
     }
 }

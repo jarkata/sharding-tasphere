@@ -20,6 +20,7 @@ package org.apache.shardingsphere.driver.jdbc.core.datasource.metadata;
 import org.apache.groovy.util.Maps;
 import org.apache.shardingsphere.driver.jdbc.core.connection.ShardingSphereConnection;
 import org.apache.shardingsphere.driver.jdbc.core.resultset.DatabaseMetaDataResultSet;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.connector.ConnectionProperties;
 import org.apache.shardingsphere.infra.instance.ComputeNodeInstanceContext;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
@@ -90,7 +91,7 @@ class ShardingSphereDatabaseMetaDataTest {
         when(shardingSphereConnection.getDatabaseConnectionManager().getRandomPhysicalDataSourceName()).thenReturn(DATA_SOURCE_NAME);
         when(shardingSphereConnection.getDatabaseConnectionManager().getRandomConnection()).thenReturn(connection);
         when(shardingSphereConnection.getContextManager().getMetaDataContexts()).thenReturn(metaDataContexts);
-        when(shardingSphereConnection.getCurrentDatabaseName()).thenReturn("foo_db");
+        when(shardingSphereConnection.getCurrentDatabaseName()).thenReturn(DefaultDatabase.LOGIC_NAME);
         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
         when(metaDataContexts.getMetaData().getDatabase(shardingSphereConnection.getCurrentDatabaseName())).thenReturn(database);
         ShardingRule shardingRule = mockShardingRule();

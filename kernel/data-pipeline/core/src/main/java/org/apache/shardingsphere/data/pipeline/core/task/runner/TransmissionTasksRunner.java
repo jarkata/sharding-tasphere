@@ -35,6 +35,7 @@ import org.apache.shardingsphere.data.pipeline.core.job.type.PipelineJobType;
 import org.apache.shardingsphere.data.pipeline.core.task.PipelineTask;
 import org.apache.shardingsphere.infra.exception.core.ShardingSpherePreconditions;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
+import org.apache.shardingsphere.infra.util.close.QuietlyCloser;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -119,8 +120,14 @@ public final class TransmissionTasksRunner implements PipelineTasksRunner {
     @Override
     public void stop() {
         jobItemContext.setStopping(true);
-        inventoryTasks.forEach(PipelineTask::stop);
-        incrementalTasks.forEach(PipelineTask::stop);
+        for (PipelineTask each : inventoryTasks) {
+            each.stop();
+            QuietlyCloser.close(each);
+        }
+        for (PipelineTask each : incrementalTasks) {
+            each.stop();
+            QuietlyCloser.close(each);
+        }
     }
     
     private final class InventoryTaskExecuteCallback implements ExecuteCallback {

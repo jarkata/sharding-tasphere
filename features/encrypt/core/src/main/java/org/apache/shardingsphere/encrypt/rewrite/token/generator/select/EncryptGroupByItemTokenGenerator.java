@@ -19,6 +19,7 @@ package org.apache.shardingsphere.encrypt.rewrite.token.generator.select;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseTypeAware;
 import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.encrypt.rule.column.EncryptColumn;
 import org.apache.shardingsphere.encrypt.rule.table.EncryptTable;
@@ -41,6 +42,7 @@ import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.Iden
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
@@ -51,13 +53,15 @@ import java.util.Optional;
 @HighFrequencyInvocation
 @RequiredArgsConstructor
 @Setter
-public final class EncryptGroupByItemTokenGenerator implements CollectionSQLTokenGenerator<SelectStatementContext>, SchemaMetaDataAware {
+public final class EncryptGroupByItemTokenGenerator implements CollectionSQLTokenGenerator<SelectStatementContext>, SchemaMetaDataAware, DatabaseTypeAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
     private Map<String, ShardingSphereSchema> schemas;
     
     private ShardingSphereSchema defaultSchema;
+    
+    private DatabaseType databaseType;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -78,21 +82,21 @@ public final class EncryptGroupByItemTokenGenerator implements CollectionSQLToke
     
     @Override
     public Collection<SQLToken> generateSQLTokens(final SelectStatementContext sqlStatementContext) {
-        Collection<SQLToken> result = new LinkedList<>();
+        Collection<SQLToken> result = new LinkedHashSet<>();
         ShardingSphereSchema schema = sqlStatementContext.getTablesContext().getSchemaName().map(schemas::get).orElseGet(() -> defaultSchema);
         for (OrderByItem each : getGroupByItems(sqlStatementContext)) {
             if (each.getSegment() instanceof ColumnOrderByItemSegment) {
                 ColumnSegment columnSegment = ((ColumnOrderByItemSegment) each.getSegment()).getColumn();
                 Map<String, String> columnTableNames = sqlStatementContext.getTablesContext().findTableNames(Collections.singleton(columnSegment), schema);
-                generateSQLToken(columnSegment, columnTableNames, sqlStatementContext.getDatabaseType()).ifPresent(result::add);
+                generateSQLToken(columnSegment, columnTableNames).ifPresent(result::add);
             }
         }
         return result;
     }
     
-    private Optional<SubstitutableColumnNameToken> generateSQLToken(final ColumnSegment columnSegment, final Map<String, String> columnTableNames, final DatabaseType databaseType) {
+    private Optional<SubstitutableColumnNameToken> generateSQLToken(final ColumnSegment columnSegment, final Map<String, String> columnTableNames) {
         String tableName = columnTableNames.getOrDefault(columnSegment.getExpression(), "");
-        Optional<EncryptTable> encryptTable = rule.findEncryptTable(tableName);
+        Optional<EncryptTable> encryptTable = encryptRule.findEncryptTable(tableName);
         String columnName = columnSegment.getIdentifier().getValue();
         if (!encryptTable.isPresent() || !encryptTable.get().isEncryptColumn(columnName)) {
             return Optional.empty();
@@ -101,10 +105,9 @@ public final class EncryptGroupByItemTokenGenerator implements CollectionSQLToke
         int startIndex = columnSegment.getOwner().isPresent() ? columnSegment.getOwner().get().getStopIndex() + 2 : columnSegment.getStartIndex();
         int stopIndex = columnSegment.getStopIndex();
         return Optional.of(encryptColumn.getAssistedQuery()
-                .map(optional -> new SubstitutableColumnNameToken(
-                        startIndex, stopIndex, createColumnProjections(optional.getName(), columnSegment.getIdentifier().getQuoteCharacter(), databaseType), databaseType))
+                .map(optional -> new SubstitutableColumnNameToken(startIndex, stopIndex, createColumnProjections(optional.getName(), columnSegment.getIdentifier().getQuoteCharacter()), databaseType))
                 .orElseGet(() -> new SubstitutableColumnNameToken(startIndex, stopIndex,
-                        createColumnProjections(encryptColumn.getCipher().getName(), columnSegment.getIdentifier().getQuoteCharacter(), databaseType), databaseType)));
+                        createColumnProjections(encryptColumn.getCipher().getName(), columnSegment.getIdentifier().getQuoteCharacter()), databaseType)));
     }
     
     private Collection<OrderByItem> getGroupByItems(final SelectStatementContext sqlStatementContext) {
@@ -115,7 +118,7 @@ public final class EncryptGroupByItemTokenGenerator implements CollectionSQLToke
         return result;
     }
     
-    private Collection<Projection> createColumnProjections(final String columnName, final QuoteCharacter quoteCharacter, final DatabaseType databaseType) {
+    private Collection<Projection> createColumnProjections(final String columnName, final QuoteCharacter quoteCharacter) {
         return Collections.singleton(new ColumnProjection(null, new IdentifierValue(columnName, quoteCharacter), null, databaseType));
     }
 }

@@ -18,19 +18,16 @@
 package org.apache.shardingsphere.metadata.persist.service.version;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.shardingsphere.infra.metadata.version.MetaDataVersion;
 import org.apache.shardingsphere.metadata.persist.node.DatabaseMetaDataNode;
 import org.apache.shardingsphere.mode.spi.PersistRepository;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Meta data version persist service.
  */
 @RequiredArgsConstructor
-@Slf4j
 public final class MetaDataVersionPersistService implements MetaDataVersionBasedPersistService {
     
     private final PersistRepository repository;
@@ -42,9 +39,7 @@ public final class MetaDataVersionPersistService implements MetaDataVersionBased
                 continue;
             }
             repository.persist(each.getActiveVersionNodePath(), each.getNextActiveVersion());
-            getVersions(each.getVersionsPath()).stream()
-                    .filter(version -> !version.equals(each.getNextActiveVersion()))
-                    .forEach(version -> repository.delete(each.getVersionsNodePath(version)));
+            repository.delete(each.getVersionsNodePath());
         }
     }
     
@@ -56,15 +51,5 @@ public final class MetaDataVersionPersistService implements MetaDataVersionBased
     @Override
     public String getVersionPathByActiveVersion(final String path, final String activeVersion) {
         return repository.query(DatabaseMetaDataNode.getVersionNodeByActiveVersionPath(path, activeVersion));
-    }
-    
-    @Override
-    public List<String> getVersions(final String path) {
-        List<String> result = repository.getChildrenKeys(path);
-        if (result.size() > 2) {
-            log.warn("There are multiple versions of ：{}, please check the configuration.", path);
-            result.sort((v1, v2) -> Integer.compare(Integer.parseInt(v2), Integer.parseInt(v1)));
-        }
-        return result;
     }
 }

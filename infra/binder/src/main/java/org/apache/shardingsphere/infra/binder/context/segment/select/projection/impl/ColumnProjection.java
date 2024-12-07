@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.Projection;
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.extractor.ProjectionIdentifierExtractEngine;
@@ -28,7 +29,6 @@ import org.apache.shardingsphere.infra.database.core.metadata.database.enums.Quo
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.database.mysql.type.MySQLDatabaseType;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.generic.ParenthesesSegment;
-import org.apache.shardingsphere.sql.parser.statement.core.segment.generic.bound.ColumnSegmentBoundInfo;
 import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.IdentifierValue;
 
 import java.util.Optional;
@@ -38,7 +38,8 @@ import java.util.Optional;
  */
 @RequiredArgsConstructor
 @Getter
-@EqualsAndHashCode(exclude = "columnBoundInfo")
+@Setter
+@EqualsAndHashCode(exclude = {"originalTable", "originalColumn"})
 @ToString
 public final class ColumnProjection implements Projection {
     
@@ -54,20 +55,17 @@ public final class ColumnProjection implements Projection {
     
     private final ParenthesesSegment rightParentheses;
     
-    private final ColumnSegmentBoundInfo columnBoundInfo;
+    private IdentifierValue originalTable;
+    
+    private IdentifierValue originalColumn;
     
     public ColumnProjection(final String owner, final String name, final String alias, final DatabaseType databaseType) {
         this(null == owner ? null : new IdentifierValue(owner, QuoteCharacter.NONE), new IdentifierValue(name, QuoteCharacter.NONE),
-                null == alias ? null : new IdentifierValue(alias, QuoteCharacter.NONE), databaseType, null, null, null);
+                null == alias ? null : new IdentifierValue(alias, QuoteCharacter.NONE), databaseType, null, null);
     }
     
     public ColumnProjection(final IdentifierValue owner, final IdentifierValue name, final IdentifierValue alias, final DatabaseType databaseType) {
-        this(owner, name, alias, databaseType, null, null, null);
-    }
-    
-    public ColumnProjection(final IdentifierValue owner, final IdentifierValue name, final IdentifierValue alias, final DatabaseType databaseType,
-                            final ParenthesesSegment leftParentheses, final ParenthesesSegment rightParentheses) {
-        this(owner, name, alias, databaseType, leftParentheses, rightParentheses, null);
+        this(owner, name, alias, databaseType, null, null);
     }
     
     /**
@@ -85,10 +83,10 @@ public final class ColumnProjection implements Projection {
      * @return original table
      */
     public IdentifierValue getOriginalTable() {
-        if (null == columnBoundInfo || null == columnBoundInfo.getOriginalTable() || Strings.isNullOrEmpty(columnBoundInfo.getOriginalTable().getValue())) {
+        if (null == originalTable || Strings.isNullOrEmpty(originalTable.getValue())) {
             return null == owner ? new IdentifierValue("") : owner;
         }
-        return columnBoundInfo.getOriginalTable();
+        return originalTable;
     }
     
     /**
@@ -97,8 +95,7 @@ public final class ColumnProjection implements Projection {
      * @return original column
      */
     public IdentifierValue getOriginalColumn() {
-        return null == columnBoundInfo || null == columnBoundInfo.getOriginalColumn() || Strings.isNullOrEmpty(columnBoundInfo.getOriginalColumn().getValue()) ? name
-                : columnBoundInfo.getOriginalColumn();
+        return null == originalColumn || Strings.isNullOrEmpty(originalColumn.getValue()) ? name : originalColumn;
     }
     
     /**

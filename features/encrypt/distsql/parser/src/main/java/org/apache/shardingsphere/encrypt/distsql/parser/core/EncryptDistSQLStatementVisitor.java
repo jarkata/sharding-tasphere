@@ -42,7 +42,6 @@ import org.apache.shardingsphere.encrypt.distsql.statement.AlterEncryptRuleState
 import org.apache.shardingsphere.encrypt.distsql.statement.CreateEncryptRuleStatement;
 import org.apache.shardingsphere.encrypt.distsql.statement.DropEncryptRuleStatement;
 import org.apache.shardingsphere.encrypt.distsql.statement.ShowEncryptRulesStatement;
-import org.apache.shardingsphere.infra.database.core.metadata.database.enums.QuoteCharacter;
 import org.apache.shardingsphere.sql.parser.api.ASTNode;
 import org.apache.shardingsphere.sql.parser.api.visitor.SQLVisitor;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.generic.DatabaseSegment;
@@ -121,7 +120,7 @@ public final class EncryptDistSQLStatementVisitor extends EncryptDistSQLStatemen
             return result;
         }
         for (PropertyContext each : ctx.properties().property()) {
-            result.setProperty(QuoteCharacter.unwrapAndTrimText(each.key.getText()), QuoteCharacter.unwrapAndTrimText(each.value.getText()));
+            result.setProperty(IdentifierValue.getQuotedContent(each.key.getText()), IdentifierValue.getQuotedContent(each.value.getText()));
         }
         return result;
     }

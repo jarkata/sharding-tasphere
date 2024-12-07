@@ -17,8 +17,8 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.expression.type;
 
-import com.google.common.collect.LinkedHashMultimap;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.ExistsSubqueryExpression;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.subquery.SubquerySegment;
@@ -40,13 +40,14 @@ class ExistsSubqueryExpressionBinderTest {
         MySQLSelectStatement selectStatement = new MySQLSelectStatement();
         selectStatement.setProjections(new ProjectionsSegment(0, 0));
         ExistsSubqueryExpression existsSubqueryExpression = new ExistsSubqueryExpression(0, 0, new SubquerySegment(0, 0, selectStatement, "t_test"));
-        SQLStatementBinderContext binderContext = new SQLStatementBinderContext(mock(ShardingSphereMetaData.class), "foo_db", new MockedDatabaseType(), Collections.emptyList());
-        ExistsSubqueryExpression actual = ExistsSubqueryExpressionBinder.bind(existsSubqueryExpression, binderContext, LinkedHashMultimap.create());
+        SQLStatementBinderContext binderContext = new SQLStatementBinderContext(mock(ShardingSphereMetaData.class), DefaultDatabase.LOGIC_NAME, new MockedDatabaseType(), Collections.emptyList());
+        ExistsSubqueryExpression actual = ExistsSubqueryExpressionBinder.bind(existsSubqueryExpression, binderContext, Collections.emptyMap());
         assertThat(actual.getStartIndex(), is(existsSubqueryExpression.getStartIndex()));
         assertThat(actual.getStopIndex(), is(existsSubqueryExpression.getStopIndex()));
         assertThat(actual.getText(), is("t_test"));
         assertThat(actual.getSubquery().getStartIndex(), is(existsSubqueryExpression.getSubquery().getStartIndex()));
         assertThat(actual.getSubquery().getStopIndex(), is(existsSubqueryExpression.getSubquery().getStopIndex()));
+        assertThat(actual.getSubquery().getSubqueryType(), is(existsSubqueryExpression.getSubquery().getSubqueryType()));
         assertThat(actual.getSubquery().getText(), is("t_test"));
         assertThat(actual.getSubquery().getSelect().getDatabaseType(), is(existsSubqueryExpression.getSubquery().getSelect().getDatabaseType()));
     }

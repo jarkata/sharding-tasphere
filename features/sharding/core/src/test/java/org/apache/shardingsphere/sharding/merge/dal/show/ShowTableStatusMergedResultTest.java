@@ -19,6 +19,7 @@ package org.apache.shardingsphere.sharding.merge.dal.show;
 
 import org.apache.groovy.util.Maps;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.executor.sql.execute.result.query.QueryResult;
 import org.apache.shardingsphere.infra.instance.ComputeNodeInstanceContext;
 import org.apache.shardingsphere.infra.merge.result.MergedResult;
@@ -49,16 +50,16 @@ import static org.mockito.Mockito.when;
 class ShowTableStatusMergedResultTest {
     
     @Mock
-    private ShardingRule rule;
+    private ShardingRule shardingRule;
     
     @Mock
     private ShardingSphereSchema schema;
     
     @BeforeEach
     void setUp() {
-        rule = buildShardingRule();
-        schema = new ShardingSphereSchema("foo_db",
-                Collections.singleton(new ShardingSphereTable("table", Collections.emptyList(), Collections.emptyList(), Collections.emptyList())), Collections.emptyList());
+        shardingRule = buildShardingRule();
+        schema = new ShardingSphereSchema(DefaultDatabase.LOGIC_NAME, Collections.singletonMap("table",
+                new ShardingSphereTable("table", Collections.emptyList(), Collections.emptyList(), Collections.emptyList())), Collections.emptyMap());
     }
     
     private ShardingRule buildShardingRule() {
@@ -69,12 +70,12 @@ class ShowTableStatusMergedResultTest {
     
     @Test
     void assertNextForEmptyQueryResult() throws SQLException {
-        assertFalse(new ShowTableStatusMergedResult(rule, mock(SQLStatementContext.class), schema, Collections.emptyList()).next());
+        assertFalse(new ShowTableStatusMergedResult(shardingRule, mock(SQLStatementContext.class), schema, Collections.emptyList()).next());
     }
     
     @Test
     void assertNextForTableRuleIsPresent() throws SQLException {
-        MergedResult mergedResult = new ShowTableStatusMergedResult(rule, mock(SQLStatementContext.class), schema, Collections.singletonList(mockQueryResult()));
+        MergedResult mergedResult = new ShowTableStatusMergedResult(shardingRule, mock(SQLStatementContext.class), schema, Collections.singletonList(mockQueryResult()));
         assertTrue(mergedResult.next());
         assertFalse(mergedResult.next());
     }

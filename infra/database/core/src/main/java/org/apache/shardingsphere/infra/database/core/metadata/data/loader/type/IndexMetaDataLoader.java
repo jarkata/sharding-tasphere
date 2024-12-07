@@ -25,9 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -59,7 +57,8 @@ public final class IndexMetaDataLoader {
                     continue;
                 }
                 if (!result.containsKey(indexName)) {
-                    IndexMetaData indexMetaData = new IndexMetaData(indexName, new LinkedList<>(Collections.singleton(resultSet.getString("COLUMN_NAME"))));
+                    IndexMetaData indexMetaData = new IndexMetaData(indexName);
+                    indexMetaData.getColumns().add(resultSet.getString("COLUMN_NAME"));
                     indexMetaData.setUnique(!resultSet.getBoolean("NON_UNIQUE"));
                     result.put(indexName, indexMetaData);
                 } else {

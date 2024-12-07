@@ -23,7 +23,6 @@ import org.apache.shardingsphere.infra.database.core.metadata.data.model.ColumnM
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.IndexMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.SchemaMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.TableMetaData;
-import org.apache.shardingsphere.infra.database.core.metadata.database.datatype.DataTypeRegistry;
 import org.apache.shardingsphere.infra.database.core.spi.DatabaseTypedSPILoader;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.database.sqlserver.type.SQLServerDatabaseType;
@@ -90,7 +89,6 @@ class SQLServerMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(LOAD_INDEX_META_DATA)
                 .executeQuery()).thenReturn(indexResultSet);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(15);
-        DataTypeRegistry.load(dataSource, "SQLServer");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.emptyList(), "foo_ds", dataSource, new SQLServerDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -110,7 +108,6 @@ class SQLServerMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(LOAD_INDEX_META_DATA)
                 .executeQuery()).thenReturn(indexResultSet);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(14);
-        DataTypeRegistry.load(dataSource, "SQLServer");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.emptyList(), "foo_ds", dataSource, new SQLServerDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -129,7 +126,6 @@ class SQLServerMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(LOAD_INDEX_META_DATA)
                 .executeQuery()).thenReturn(indexResultSet);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(15);
-        DataTypeRegistry.load(dataSource, "SQLServer");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singletonList("tbl"), "foo_ds", dataSource, new SQLServerDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -148,7 +144,6 @@ class SQLServerMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(LOAD_INDEX_META_DATA)
                 .executeQuery()).thenReturn(indexResultSet);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(14);
-        DataTypeRegistry.load(dataSource, "SQLServer");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singletonList("tbl"), "foo_ds", dataSource, new SQLServerDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -209,7 +204,8 @@ class SQLServerMetaDataLoaderTest {
         assertThat(actualTableMetaData.getColumns().size(), is(2));
         assertThat(actualTableMetaData.getIndexes().size(), is(1));
         Iterator<IndexMetaData> indexesIterator = actualTableMetaData.getIndexes().iterator();
-        IndexMetaData expected = new IndexMetaData("id", Collections.singletonList("id"));
+        IndexMetaData expected = new IndexMetaData("id");
+        expected.getColumns().add("id");
         expected.setUnique(true);
         assertThat(indexesIterator.next(), is(expected));
     }

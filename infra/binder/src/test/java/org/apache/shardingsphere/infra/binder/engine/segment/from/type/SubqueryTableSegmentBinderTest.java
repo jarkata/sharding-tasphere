@@ -17,11 +17,9 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.from.type;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereColumn;
@@ -45,7 +43,9 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -72,12 +72,12 @@ class SubqueryTableSegmentBinderTest {
         SubqueryTableSegment subqueryTableSegment = new SubqueryTableSegment(0, 0, new SubquerySegment(0, 0, selectStatement, ""));
         subqueryTableSegment.setAlias(new AliasSegment(0, 0, new IdentifierValue("temp")));
         ShardingSphereMetaData metaData = createMetaData();
-        Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts = LinkedHashMultimap.create();
-        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, "foo_db", databaseType, Collections.emptySet()),
-                tableBinderContexts, LinkedHashMultimap.create());
+        Map<String, TableSegmentBinderContext> tableBinderContexts = new LinkedHashMap<>();
+        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, DefaultDatabase.LOGIC_NAME, databaseType, Collections.emptySet()),
+                tableBinderContexts, Collections.emptyMap());
         assertTrue(actual.getAlias().isPresent());
-        assertTrue(tableBinderContexts.containsKey(new CaseInsensitiveString("temp")));
-        List<ProjectionSegment> projectionSegments = new ArrayList<>(tableBinderContexts.get(new CaseInsensitiveString("temp")).iterator().next().getProjectionSegments());
+        assertTrue(tableBinderContexts.containsKey("temp"));
+        List<ProjectionSegment> projectionSegments = new ArrayList<>(tableBinderContexts.get("temp").getProjectionSegments());
         assertThat(projectionSegments.size(), is(3));
         assertThat(projectionSegments.get(0), instanceOf(ColumnProjectionSegment.class));
         assertTrue(((ColumnProjectionSegment) projectionSegments.get(0)).getColumn().getOwner().isPresent());
@@ -106,12 +106,12 @@ class SubqueryTableSegmentBinderTest {
         SubqueryTableSegment subqueryTableSegment = new SubqueryTableSegment(0, 0, new SubquerySegment(0, 0, selectStatement, ""));
         subqueryTableSegment.setAlias(new AliasSegment(0, 0, new IdentifierValue("temp")));
         ShardingSphereMetaData metaData = createMetaData();
-        Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts = LinkedHashMultimap.create();
-        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, "foo_db", databaseType, Collections.emptySet()),
-                tableBinderContexts, LinkedHashMultimap.create());
+        Map<String, TableSegmentBinderContext> tableBinderContexts = new LinkedHashMap<>();
+        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, DefaultDatabase.LOGIC_NAME, databaseType, Collections.emptySet()),
+                tableBinderContexts, Collections.emptyMap());
         assertTrue(actual.getAlias().isPresent());
-        assertTrue(tableBinderContexts.containsKey(new CaseInsensitiveString("temp")));
-        List<ProjectionSegment> projectionSegments = new ArrayList<>(tableBinderContexts.get(new CaseInsensitiveString("temp")).iterator().next().getProjectionSegments());
+        assertTrue(tableBinderContexts.containsKey("temp"));
+        List<ProjectionSegment> projectionSegments = new ArrayList<>(tableBinderContexts.get("temp").getProjectionSegments());
         assertThat(projectionSegments.size(), is(1));
         assertThat(projectionSegments.get(0), instanceOf(ColumnProjectionSegment.class));
         assertTrue(((ColumnProjectionSegment) projectionSegments.get(0)).getColumn().getOwner().isPresent());
@@ -129,24 +129,24 @@ class SubqueryTableSegmentBinderTest {
         when(selectStatement.getProjections()).thenReturn(projectionsSegment);
         SubqueryTableSegment subqueryTableSegment = new SubqueryTableSegment(0, 0, new SubquerySegment(0, 0, selectStatement, ""));
         ShardingSphereMetaData metaData = createMetaData();
-        Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts = LinkedHashMultimap.create();
-        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, "foo_db", databaseType, Collections.emptySet()),
-                tableBinderContexts, LinkedHashMultimap.create());
+        Map<String, TableSegmentBinderContext> tableBinderContexts = new LinkedHashMap<>();
+        SubqueryTableSegment actual = SubqueryTableSegmentBinder.bind(subqueryTableSegment, new SQLStatementBinderContext(metaData, DefaultDatabase.LOGIC_NAME, databaseType, Collections.emptySet()),
+                tableBinderContexts, Collections.emptyMap());
         assertFalse(actual.getAlias().isPresent());
-        assertTrue(tableBinderContexts.containsKey(new CaseInsensitiveString("")));
+        assertTrue(tableBinderContexts.containsKey(""));
     }
     
     private ShardingSphereMetaData createMetaData() {
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class, RETURNS_DEEP_STUBS);
-        when(schema.getTable("t_order").getAllColumns()).thenReturn(Arrays.asList(
+        when(schema.getTable("t_order").getColumnValues()).thenReturn(Arrays.asList(
                 new ShardingSphereColumn("order_id", Types.INTEGER, true, false, false, true, false, false),
                 new ShardingSphereColumn("user_id", Types.INTEGER, false, false, false, true, false, false),
                 new ShardingSphereColumn("status", Types.INTEGER, false, false, false, true, false, false)));
         ShardingSphereMetaData result = mock(ShardingSphereMetaData.class, RETURNS_DEEP_STUBS);
-        when(result.getDatabase("foo_db").getSchema("foo_db")).thenReturn(schema);
-        when(result.containsDatabase("foo_db")).thenReturn(true);
-        when(result.getDatabase("foo_db").containsSchema("foo_db")).thenReturn(true);
-        when(result.getDatabase("foo_db").getSchema("foo_db").containsTable("t_order")).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(schema);
+        when(result.containsDatabase(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).containsSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(true);
+        when(result.getDatabase(DefaultDatabase.LOGIC_NAME).getSchema(DefaultDatabase.LOGIC_NAME).containsTable("t_order")).thenReturn(true);
         return result;
     }
 }

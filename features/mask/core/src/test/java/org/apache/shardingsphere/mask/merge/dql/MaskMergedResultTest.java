@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -48,7 +46,6 @@ import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class MaskMergedResultTest {
     
     @Mock
@@ -61,11 +58,6 @@ class MaskMergedResultTest {
     
     @Test
     void assertGetValue() throws SQLException {
-        assertNull(new MaskMergedResult(mockMaskRule(), mockSelectStatementContext(), mergedResult).getValue(1, String.class));
-    }
-    
-    @Test
-    void assertGetValueWithNull() throws SQLException {
         when(mergedResult.getValue(1, Object.class)).thenReturn("VALUE");
         assertThat(new MaskMergedResult(mockMaskRule(), mockSelectStatementContext(), mergedResult).getValue(1, String.class), is("MASK_VALUE"));
     }

@@ -17,6 +17,7 @@
 
 package org.apache.shardingsphere.infra.expr.core;
 
+import org.apache.shardingsphere.infra.exception.core.external.server.ShardingSphereServerException;
 import org.apache.shardingsphere.infra.spi.exception.ServiceProviderNotFoundException;
 import org.junit.jupiter.api.Test;
 
@@ -40,8 +41,8 @@ class InlineExpressionParserFactoryTest {
     
     @Test
     void assertUndefinedInstance() {
-        assertThrows(ServiceProviderNotFoundException.class,
-                () -> InlineExpressionParserFactory.newInstance("<UNDEFINED>t_order_0, t_order_1").getType());
+        assertThrows(ShardingSphereServerException.class,
+                     () -> InlineExpressionParserFactory.newInstance("<UNDEFINED>t_order_0, t_order_1").getType());
     }
     
     @Test

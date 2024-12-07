@@ -20,8 +20,8 @@ package org.apache.shardingsphere.sharding.merge.dql.orderby;
 import org.apache.shardingsphere.infra.binder.context.segment.select.orderby.OrderByItem;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.SelectStatementContext;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.metadata.database.enums.NullsOrderType;
-import org.apache.shardingsphere.infra.database.core.metadata.database.enums.TableType;
 import org.apache.shardingsphere.infra.executor.sql.execute.result.query.QueryResult;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
@@ -90,7 +90,7 @@ class OrderByValueTest {
         selectStatement.setProjections(projectionsSegment);
         selectStatement.setOrderBy(createOrderBySegment());
         SelectStatementContext selectStatementContext = new SelectStatementContext(
-                createShardingSphereMetaData(), Collections.emptyList(), selectStatement, "foo_db", Collections.emptyList());
+                createShardingSphereMetaData(), Collections.emptyList(), selectStatement, DefaultDatabase.LOGIC_NAME, Collections.emptyList());
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
         QueryResult queryResult1 = createQueryResult("1", "2");
         OrderByValue orderByValue1 = new OrderByValue(queryResult1, Arrays.asList(
@@ -111,10 +111,9 @@ class OrderByValueTest {
         assertFalse(orderByValue2.getQueryResult().next());
     }
     
-    private ShardingSphereMetaData createShardingSphereMetaData() {
-        ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-        when(database.getName()).thenReturn("foo_db");
-        return new ShardingSphereMetaData(Collections.singleton(database), mock(ResourceMetaData.class), mock(RuleMetaData.class), mock(ConfigurationProperties.class));
+    private static ShardingSphereMetaData createShardingSphereMetaData() {
+        return new ShardingSphereMetaData(Collections.singletonMap(DefaultDatabase.LOGIC_NAME, mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS)), mock(ResourceMetaData.class),
+                mock(RuleMetaData.class), mock(ConfigurationProperties.class));
     }
     
     @Test
@@ -147,9 +146,9 @@ class OrderByValueTest {
         selectStatement.setProjections(projectionsSegment);
         selectStatement.setOrderBy(createOrderBySegment());
         SelectStatementContext selectStatementContext = new SelectStatementContext(createShardingSphereMetaData(),
-                Collections.emptyList(), selectStatement, "foo_db", Collections.emptyList());
+                Collections.emptyList(), selectStatement, DefaultDatabase.LOGIC_NAME, Collections.emptyList());
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
-        when(schema.getTable("foo_tbl")).thenReturn(new ShardingSphereTable("foo_tbl", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), TableType.TABLE));
+        when(schema.getTable("table")).thenReturn(new ShardingSphereTable());
         QueryResult queryResult1 = createQueryResult("1", "2");
         OrderByValue orderByValue1 = new OrderByValue(queryResult1, Arrays.asList(
                 createOrderByItem(new IndexOrderByItemSegment(0, 0, 1, OrderDirection.DESC, NullsOrderType.FIRST)),
@@ -199,7 +198,7 @@ class OrderByValueTest {
         selectStatement.setProjections(projectionsSegment);
         selectStatement.setOrderBy(createOrderBySegment());
         SelectStatementContext selectStatementContext = new SelectStatementContext(createShardingSphereMetaData(),
-                Collections.emptyList(), selectStatement, "foo_db", Collections.emptyList());
+                Collections.emptyList(), selectStatement, DefaultDatabase.LOGIC_NAME, Collections.emptyList());
         ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
         QueryResult queryResult1 = createQueryResult("1", "2");
         OrderByValue orderByValue1 = new OrderByValue(queryResult1, Arrays.asList(

@@ -19,6 +19,7 @@ package org.apache.shardingsphere.driver.jdbc.adapter;
 
 import org.apache.shardingsphere.driver.jdbc.core.datasource.ShardingSphereDataSource;
 import org.apache.shardingsphere.infra.config.rule.RuleConfiguration;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.test.fixture.jdbc.MockedDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +40,8 @@ class WrapperAdapterTest {
     
     @BeforeEach
     void setUp() throws SQLException {
-        wrapperAdapter = new ShardingSphereDataSource("foo_db", null, Collections.singletonMap("ds", new MockedDataSource()), Collections.singleton(mock(RuleConfiguration.class)), new Properties());
+        wrapperAdapter = new ShardingSphereDataSource(
+                DefaultDatabase.LOGIC_NAME, null, Collections.singletonMap("ds", new MockedDataSource()), Collections.singletonList(mock(RuleConfiguration.class)), new Properties());
     }
     
     @Test

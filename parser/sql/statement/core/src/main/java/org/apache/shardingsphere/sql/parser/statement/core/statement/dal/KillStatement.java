@@ -29,6 +29,4 @@ import org.apache.shardingsphere.sql.parser.statement.core.statement.AbstractSQL
 public abstract class KillStatement extends AbstractSQLStatement implements DALStatement {
     
     private String processId;
-    
-    private String scope;
 }

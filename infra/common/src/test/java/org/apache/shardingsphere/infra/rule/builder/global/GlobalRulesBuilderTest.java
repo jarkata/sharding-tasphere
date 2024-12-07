@@ -32,25 +32,26 @@ import java.util.Properties;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class GlobalRulesBuilderTest {
     
     @Test
     void assertBuildRules() {
-        Collection<ShardingSphereRule> rules = GlobalRulesBuilder.buildRules(Collections.singletonList(new FixtureGlobalRuleConfiguration()), Collections.singleton(buildDatabase()), mock());
-        assertThat(rules.size(), is(1));
-        assertThat(rules.iterator().next(), instanceOf(FixtureGlobalRule.class));
+        Collection<ShardingSphereRule> shardingSphereRules = GlobalRulesBuilder
+                .buildRules(Collections.singletonList(new FixtureGlobalRuleConfiguration()), Collections.singletonMap("logic_db", buildDatabase()), mock(ConfigurationProperties.class));
+        assertThat(shardingSphereRules.size(), is(1));
     }
     
     @Test
-    void assertBuildSingleRules() {
-        Collection<ShardingSphereRule> rules = GlobalRulesBuilder.buildSingleRules(new FixtureGlobalRuleConfiguration(), Collections.singleton(buildDatabase()), mock());
-        assertThat(rules.size(), is(1));
+    void assertBuildRulesClassType() {
+        Collection<ShardingSphereRule> shardingSphereRules = GlobalRulesBuilder
+                .buildRules(Collections.singletonList(new FixtureGlobalRuleConfiguration()), Collections.singletonMap("logic_db", buildDatabase()), mock(ConfigurationProperties.class));
+        assertTrue(shardingSphereRules.toArray()[0] instanceof FixtureGlobalRule);
     }
     
     private ShardingSphereDatabase buildDatabase() {
-        return ShardingSphereDatabase.create("foo_db", TypedSPILoader.getService(DatabaseType.class, "FIXTURE"), new ConfigurationProperties(new Properties()));
+        return ShardingSphereDatabase.create("logic_db", TypedSPILoader.getService(DatabaseType.class, "MySQL"), new ConfigurationProperties(new Properties()));
     }
 }

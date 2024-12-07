@@ -23,6 +23,7 @@ import org.apache.shardingsphere.distsql.handler.validate.DistSQLDataSourcePoolP
 import org.apache.shardingsphere.distsql.statement.ral.updatable.ImportMetaDataStatement;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
 import org.apache.shardingsphere.infra.config.props.ConfigurationPropertyKey;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.datasource.pool.props.domain.DataSourcePoolProperties;
 import org.apache.shardingsphere.infra.exception.dialect.exception.syntax.database.DatabaseCreateExistsException;
 import org.apache.shardingsphere.infra.exception.kernel.metadata.resource.storageunit.EmptyStorageUnitException;
@@ -128,11 +129,10 @@ class ImportMetaDataExecutorTest {
                 .thenReturn(new ConfigurationProperties(PropertiesBuilder.build(new Property(ConfigurationPropertyKey.PROXY_FRONTEND_DATABASE_PROTOCOL_TYPE.getKey(), "MySQL"))));
         if (null != feature) {
             ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-            when(database.getName()).thenReturn(feature);
-            when(database.getSchema("foo_db")).thenReturn(new ShardingSphereSchema("foo_db", createTables(), Collections.emptyList()));
+            when(database.getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(new ShardingSphereSchema(DefaultDatabase.LOGIC_NAME, createTables(), Collections.emptyMap()));
             Map<String, StorageUnit> storageUnits = createStorageUnits();
             when(database.getResourceMetaData().getStorageUnits()).thenReturn(storageUnits);
-            when(result.getMetaDataContexts().getMetaData().getAllDatabases()).thenReturn(Collections.singleton(database));
+            when(result.getMetaDataContexts().getMetaData().getDatabases()).thenReturn(Collections.singletonMap(feature, database));
             when(result.getMetaDataContexts().getMetaData().getDatabase(feature)).thenReturn(database);
         }
         return result;
@@ -149,9 +149,9 @@ class ImportMetaDataExecutorTest {
         return result;
     }
     
-    private Collection<ShardingSphereTable> createTables() {
+    private Map<String, ShardingSphereTable> createTables() {
         Collection<ShardingSphereColumn> columns = Collections.singleton(new ShardingSphereColumn("order_id", 0, false, false, false, true, false, false));
-        Collection<ShardingSphereIndex> indexes = Collections.singleton(new ShardingSphereIndex("primary", Collections.emptyList(), false));
-        return Collections.singletonList(new ShardingSphereTable("t_order", columns, indexes, Collections.emptyList()));
+        Collection<ShardingSphereIndex> indexes = Collections.singleton(new ShardingSphereIndex("primary"));
+        return Collections.singletonMap("t_order", new ShardingSphereTable("t_order", columns, indexes, Collections.emptyList()));
     }
 }

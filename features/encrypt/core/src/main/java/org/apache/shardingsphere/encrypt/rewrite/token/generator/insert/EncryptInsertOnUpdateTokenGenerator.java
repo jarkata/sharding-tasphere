@@ -21,7 +21,7 @@ import com.google.common.base.Preconditions;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.shardingsphere.encrypt.exception.syntax.UnsupportedEncryptSQLException;
-import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.aware.DatabaseAware;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseNameAware;
 import org.apache.shardingsphere.encrypt.rewrite.token.pojo.EncryptAssignmentToken;
 import org.apache.shardingsphere.encrypt.rewrite.token.pojo.EncryptFunctionAssignmentToken;
 import org.apache.shardingsphere.encrypt.rewrite.token.pojo.EncryptLiteralAssignmentToken;
@@ -35,7 +35,6 @@ import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.statement.dml.InsertStatementContext;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseTypeRegistry;
-import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.CollectionSQLTokenGenerator;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.pojo.SQLToken;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.assignment.ColumnAssignmentSegment;
@@ -57,11 +56,11 @@ import java.util.Optional;
 @HighFrequencyInvocation
 @RequiredArgsConstructor
 @Setter
-public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLTokenGenerator<InsertStatementContext>, DatabaseAware {
+public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLTokenGenerator<InsertStatementContext>, DatabaseNameAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
-    private ShardingSphereDatabase database;
+    private String databaseName;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -77,9 +76,9 @@ public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLT
             return Collections.emptyList();
         }
         String schemaName = insertStatementContext.getTablesContext().getSchemaName()
-                .orElseGet(() -> new DatabaseTypeRegistry(insertStatementContext.getDatabaseType()).getDefaultSchemaName(database.getName()));
+                .orElseGet(() -> new DatabaseTypeRegistry(insertStatementContext.getDatabaseType()).getDefaultSchemaName(databaseName));
         String tableName = insertStatement.getTable().map(optional -> optional.getTableName().getIdentifier().getValue()).orElse("");
-        EncryptTable encryptTable = rule.getEncryptTable(tableName);
+        EncryptTable encryptTable = encryptRule.getEncryptTable(tableName);
         Collection<SQLToken> result = new LinkedList<>();
         for (ColumnAssignmentSegment each : onDuplicateKeyColumnsSegments) {
             boolean leftColumnIsEncrypt = encryptTable.isEncryptColumn(each.getColumns().get(0).getIdentifier().getValue());
@@ -174,7 +173,7 @@ public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLT
     private void addCipherAssignment(final String schemaName, final String tableName, final EncryptColumn encryptColumn,
                                      final ColumnAssignmentSegment assignmentSegment, final EncryptLiteralAssignmentToken token) {
         Object originalValue = ((LiteralExpressionSegment) assignmentSegment.getValue()).getLiterals();
-        Object cipherValue = encryptColumn.getCipher().encrypt(database.getName(), schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(),
+        Object cipherValue = encryptColumn.getCipher().encrypt(databaseName, schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(),
                 Collections.singletonList(originalValue)).iterator().next();
         token.addAssignment(encryptColumn.getCipher().getName(), cipherValue);
     }
@@ -184,7 +183,7 @@ public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLT
         encryptColumn.getAssistedQuery().ifPresent(optional -> {
             Object originalValue = ((LiteralExpressionSegment) assignmentSegment.getValue()).getLiterals();
             Object assistedQueryValue = optional.encrypt(
-                    database.getName(), schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(), Collections.singletonList(originalValue)).iterator().next();
+                    databaseName, schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(), Collections.singletonList(originalValue)).iterator().next();
             token.addAssignment(optional.getName(), assistedQueryValue);
         });
     }
@@ -194,7 +193,7 @@ public final class EncryptInsertOnUpdateTokenGenerator implements CollectionSQLT
         encryptColumn.getLikeQuery().ifPresent(optional -> {
             Object originalValue = ((LiteralExpressionSegment) assignmentSegment.getValue()).getLiterals();
             Object likeValue = optional.encrypt(
-                    database.getName(), schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(), Collections.singletonList(originalValue)).iterator().next();
+                    databaseName, schemaName, tableName, assignmentSegment.getColumns().get(0).getIdentifier().getValue(), Collections.singletonList(originalValue)).iterator().next();
             token.addAssignment(optional.getName(), likeValue);
         });
     }

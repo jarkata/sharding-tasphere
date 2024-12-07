@@ -18,7 +18,6 @@
 package org.apache.shardingsphere.sharding.rewrite.token.generator.impl;
 
 import com.google.common.base.Preconditions;
-import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.DerivedColumn;
 import org.apache.shardingsphere.infra.binder.context.segment.select.projection.impl.AggregationDistinctProjection;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
@@ -34,7 +33,6 @@ import java.util.LinkedList;
 /**
  * Sharding aggregation distinct token generator.
  */
-@HighFrequencyInvocation
 public final class ShardingAggregationDistinctTokenGenerator implements CollectionSQLTokenGenerator<SQLStatementContext>, IgnoreForSingleRoute {
     
     @Override

@@ -17,9 +17,9 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.expression.type;
 
-import com.google.common.collect.LinkedHashMultimap;
 import org.apache.shardingsphere.infra.binder.engine.segment.SegmentType;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.metadata.ShardingSphereMetaData;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.FunctionSegment;
 import org.apache.shardingsphere.test.fixture.database.MockedDatabaseType;
@@ -35,8 +35,8 @@ class FunctionExpressionSegmentBinderTest {
     @Test
     void assertBindFunctionExpressionSegment() {
         FunctionSegment functionSegment = new FunctionSegment(0, 0, "CONCAT", "('%','abc','%')");
-        SQLStatementBinderContext binderContext = new SQLStatementBinderContext(new ShardingSphereMetaData(), "foo_db", new MockedDatabaseType(), Collections.emptyList());
-        FunctionSegment actual = FunctionExpressionSegmentBinder.bind(functionSegment, SegmentType.PROJECTION, binderContext, LinkedHashMultimap.create(), LinkedHashMultimap.create());
+        SQLStatementBinderContext binderContext = new SQLStatementBinderContext(new ShardingSphereMetaData(), DefaultDatabase.LOGIC_NAME, new MockedDatabaseType(), Collections.emptyList());
+        FunctionSegment actual = FunctionExpressionSegmentBinder.bind(functionSegment, SegmentType.PROJECTION, binderContext, Collections.emptyMap(), Collections.emptyMap());
         assertThat(actual.getStartIndex(), is(functionSegment.getStartIndex()));
         assertThat(actual.getStopIndex(), is(functionSegment.getStopIndex()));
         assertThat(actual.getFunctionName(), is("CONCAT"));

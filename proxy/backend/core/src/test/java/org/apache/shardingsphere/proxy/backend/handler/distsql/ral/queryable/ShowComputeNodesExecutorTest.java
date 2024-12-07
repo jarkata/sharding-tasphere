@@ -59,7 +59,6 @@ class ShowComputeNodesExecutorTest {
         assertThat(row.getCell(7), is("0"));
         assertThat(row.getCell(8), is(""));
         assertThat(row.getCell(9), is("foo_version"));
-        assertThat(row.getCell(10), is(""));
     }
     
     @Test
@@ -80,7 +79,6 @@ class ShowComputeNodesExecutorTest {
         assertThat(row.getCell(7), is("1"));
         assertThat(row.getCell(8), is(""));
         assertThat(row.getCell(9), is("foo_version"));
-        assertThat(row.getCell(10), is(""));
     }
     
     private ComputeNodeInstanceContext createStandaloneInstanceContext() {

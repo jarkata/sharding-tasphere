@@ -138,13 +138,4 @@ public interface DialectDatabaseMetaData extends DatabaseTypedSPI {
     default boolean isSupportGlobalCSN() {
         return false;
     }
-    
-    /**
-     * Whether DDL need implicit commit.
-     *
-     * @return need or not
-     */
-    default boolean isDDLNeedImplicitCommit() {
-        return false;
-    }
 }

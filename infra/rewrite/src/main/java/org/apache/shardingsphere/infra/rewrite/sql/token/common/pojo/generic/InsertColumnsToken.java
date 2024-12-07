@@ -44,9 +44,4 @@ public final class InsertColumnsToken extends SQLToken implements Attachable {
         columns.forEach(result::add);
         return result.toString();
     }
-    
-    @Override
-    public int getStopIndex() {
-        return getStartIndex();
-    }
 }

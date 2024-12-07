@@ -17,8 +17,6 @@
 
 package org.apache.shardingsphere.infra.binder.engine.segment.where;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.google.common.collect.Multimap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.SegmentType;
@@ -26,6 +24,8 @@ import org.apache.shardingsphere.infra.binder.engine.segment.expression.Expressi
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
 import org.apache.shardingsphere.infra.binder.engine.statement.SQLStatementBinderContext;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.predicate.WhereSegment;
+
+import java.util.Map;
 
 /**
  * Where segment binder.
@@ -43,8 +43,7 @@ public final class WhereSegmentBinder {
      * @return bound where segment
      */
     public static WhereSegment bind(final WhereSegment segment, final SQLStatementBinderContext binderContext,
-                                    final Multimap<CaseInsensitiveString, TableSegmentBinderContext> tableBinderContexts,
-                                    final Multimap<CaseInsensitiveString, TableSegmentBinderContext> outerTableBinderContexts) {
+                                    final Map<String, TableSegmentBinderContext> tableBinderContexts, final Map<String, TableSegmentBinderContext> outerTableBinderContexts) {
         return new WhereSegment(segment.getStartIndex(), segment.getStopIndex(),
                 ExpressionSegmentBinder.bind(segment.getExpr(), SegmentType.PREDICATE, binderContext, tableBinderContexts, outerTableBinderContexts));
     }

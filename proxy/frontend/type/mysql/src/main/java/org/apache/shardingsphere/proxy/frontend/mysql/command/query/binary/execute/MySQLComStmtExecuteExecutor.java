@@ -97,12 +97,12 @@ public final class MySQLComStmtExecuteExecutor implements QueryCommandExecutor {
     private Collection<DatabasePacket> processQuery(final QueryResponseHeader queryResponseHeader) {
         responseType = ResponseType.QUERY;
         int characterSet = connectionSession.getAttributeMap().attr(MySQLConstants.CHARACTER_SET_ATTRIBUTE_KEY).get().getId();
-        return ResponsePacketBuilder.buildQueryResponsePackets(queryResponseHeader, characterSet, ServerStatusFlagCalculator.calculateFor(connectionSession, true));
+        return ResponsePacketBuilder.buildQueryResponsePackets(queryResponseHeader, characterSet, ServerStatusFlagCalculator.calculateFor(connectionSession));
     }
     
     private Collection<DatabasePacket> processUpdate(final UpdateResponseHeader updateResponseHeader) {
         responseType = ResponseType.UPDATE;
-        return ResponsePacketBuilder.buildUpdateResponsePackets(updateResponseHeader, ServerStatusFlagCalculator.calculateFor(connectionSession, true));
+        return ResponsePacketBuilder.buildUpdateResponsePackets(updateResponseHeader, ServerStatusFlagCalculator.calculateFor(connectionSession));
     }
     
     @Override
@@ -126,8 +126,6 @@ public final class MySQLComStmtExecuteExecutor implements QueryCommandExecutor {
     
     @Override
     public void close() throws SQLException {
-        if (null != proxyBackendHandler) {
-            proxyBackendHandler.close();
-        }
+        proxyBackendHandler.close();
     }
 }

@@ -49,8 +49,13 @@ public final class TPSJobRateLimitAlgorithm implements JobRateLimitAlgorithm {
     
     @Override
     public void intercept(final PipelineSQLOperationType type, final Number data) {
-        if (type != PipelineSQLOperationType.SELECT) {
-            rateLimiter.acquire(null == data ? 1 : data.intValue());
+        switch (type) {
+            case INSERT:
+            case DELETE:
+            case UPDATE:
+                rateLimiter.acquire(null != data ? data.intValue() : 1);
+                break;
+            default:
         }
     }
     

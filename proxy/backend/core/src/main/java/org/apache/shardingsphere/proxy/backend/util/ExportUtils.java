@@ -21,15 +21,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.shardingsphere.infra.config.rule.RuleConfiguration;
 import org.apache.shardingsphere.infra.config.rule.scope.DatabaseRuleConfiguration;
-import org.apache.shardingsphere.infra.config.rule.scope.DatabaseRuleConfigurationEmptyChecker;
 import org.apache.shardingsphere.infra.datasource.pool.props.domain.DataSourcePoolProperties;
-import org.apache.shardingsphere.infra.exception.generic.FileIOException;
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.metadata.database.resource.unit.StorageUnit;
 import org.apache.shardingsphere.infra.spi.type.ordered.OrderedSPILoader;
-import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
 import org.apache.shardingsphere.infra.util.yaml.YamlEngine;
 import org.apache.shardingsphere.infra.yaml.config.swapper.rule.YamlRuleConfigurationSwapper;
+import org.apache.shardingsphere.infra.exception.generic.FileIOException;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,13 +106,12 @@ public final class ExportUtils {
     
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static void appendRuleConfigurations(final Collection<RuleConfiguration> ruleConfigs, final StringBuilder stringBuilder) {
-        if (ruleConfigs.isEmpty()
-                || ruleConfigs.stream().allMatch(each -> TypedSPILoader.getService(DatabaseRuleConfigurationEmptyChecker.class, each.getClass()).isEmpty((DatabaseRuleConfiguration) each))) {
+        if (ruleConfigs.isEmpty() || ruleConfigs.stream().allMatch(each -> ((DatabaseRuleConfiguration) each).isEmpty())) {
             return;
         }
         stringBuilder.append("rules:").append(System.lineSeparator());
         for (Entry<RuleConfiguration, YamlRuleConfigurationSwapper> entry : OrderedSPILoader.getServices(YamlRuleConfigurationSwapper.class, ruleConfigs).entrySet()) {
-            if (TypedSPILoader.getService(DatabaseRuleConfigurationEmptyChecker.class, entry.getKey().getClass()).isEmpty((DatabaseRuleConfiguration) entry.getKey())) {
+            if (((DatabaseRuleConfiguration) entry.getKey()).isEmpty()) {
                 continue;
             }
             stringBuilder.append(YamlEngine.marshal(Collections.singletonList(entry.getValue().swapToYamlConfiguration(entry.getKey()))));

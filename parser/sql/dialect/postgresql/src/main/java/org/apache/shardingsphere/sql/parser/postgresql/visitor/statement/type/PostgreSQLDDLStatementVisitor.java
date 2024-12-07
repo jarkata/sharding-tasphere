@@ -17,8 +17,6 @@
 
 package org.apache.shardingsphere.sql.parser.postgresql.visitor.statement.type;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 import org.apache.shardingsphere.sql.parser.api.ASTNode;
 import org.apache.shardingsphere.sql.parser.api.visitor.statement.type.DDLStatementVisitor;
 import org.apache.shardingsphere.sql.parser.autogen.PostgreSQLStatementParser.AbsoluteCountContext;
@@ -562,17 +560,13 @@ public final class PostgreSQLDDLStatementVisitor extends PostgreSQLStatementVisi
         DataTypeSegment dataType = (DataTypeSegment) visit(ctx.dataType());
         boolean isPrimaryKey = ctx.columnConstraint().stream().anyMatch(each -> null != each.columnConstraintOption() && null != each.columnConstraintOption().primaryKey());
         // TODO parse not null
-        ColumnDefinitionSegment result = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, isPrimaryKey, false, getText(ctx));
+        ColumnDefinitionSegment result = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, isPrimaryKey, false);
         for (ColumnConstraintContext each : ctx.columnConstraint()) {
             if (null != each.columnConstraintOption().tableName()) {
                 result.getReferencedTables().add((SimpleTableSegment) visit(each.columnConstraintOption().tableName()));
             }
         }
         return result;
-    }
-    
-    private String getText(final ParserRuleContext ctx) {
-        return ctx.start.getInputStream().getText(new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex()));
     }
     
     @Override
@@ -608,7 +602,7 @@ public final class PostgreSQLDDLStatementVisitor extends PostgreSQLStatementVisi
         // TODO visit pk and table ref
         ColumnSegment column = (ColumnSegment) visit(ctx.modifyColumn().columnName());
         DataTypeSegment dataType = null == ctx.dataType() ? null : (DataTypeSegment) visit(ctx.dataType());
-        ColumnDefinitionSegment columnDefinition = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, false, false, getText(ctx));
+        ColumnDefinitionSegment columnDefinition = new ColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), column, dataType, false, false);
         return new ModifyColumnDefinitionSegment(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex(), columnDefinition);
     }
     
@@ -1269,72 +1263,105 @@ public final class PostgreSQLDDLStatementVisitor extends PostgreSQLStatementVisi
     
     @Override
     public ASTNode visitNext(final NextContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.NEXT);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.NEXT);
+        return result;
     }
     
     @Override
     public ASTNode visitPrior(final PriorContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.PRIOR);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.PRIOR);
+        return result;
     }
     
     @Override
     public ASTNode visitFirst(final FirstContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.FIRST);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.FIRST);
+        return result;
     }
     
     @Override
     public ASTNode visitLast(final LastContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.LAST);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.LAST);
+        return result;
     }
     
     @Override
     public ASTNode visitAbsoluteCount(final AbsoluteCountContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.ABSOLUTE_COUNT, ((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.ABSOLUTE_COUNT);
+        result.setCount(((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        return result;
     }
     
     @Override
     public ASTNode visitRelativeCount(final RelativeCountContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.RELATIVE_COUNT, ((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.RELATIVE_COUNT);
+        result.setCount(((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        return result;
     }
     
     @Override
     public ASTNode visitCount(final CountContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.COUNT, ((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.COUNT);
+        result.setCount(((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        return result;
     }
     
     @Override
     public ASTNode visitAll(final AllContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.ALL);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.ALL);
+        return result;
     }
     
     @Override
     public ASTNode visitForward(final ForwardContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.FORWARD);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.FORWARD);
+        return result;
     }
     
     @Override
     public ASTNode visitForwardCount(final ForwardCountContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.FORWARD_COUNT, ((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.FORWARD_COUNT);
+        result.setCount(((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        return result;
     }
     
     @Override
     public ASTNode visitForwardAll(final ForwardAllContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.FORWARD_ALL);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.FORWARD_ALL);
+        return result;
     }
     
     @Override
     public ASTNode visitBackward(final BackwardContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.BACKWARD);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.BACKWARD);
+        return result;
     }
     
     @Override
     public ASTNode visitBackwardCount(final BackwardCountContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.BACKWARD_COUNT, ((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.BACKWARD_COUNT);
+        result.setCount(((NumberLiteralValue) visit(ctx.signedIconst())).getValue().longValue());
+        return result;
     }
     
     @Override
     public ASTNode visitBackwardAll(final BackwardAllContext ctx) {
-        return new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(), DirectionType.BACKWARD_ALL);
+        DirectionSegment result = new DirectionSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
+        result.setDirectionType(DirectionType.BACKWARD_ALL);
+        return result;
     }
     
     @Override

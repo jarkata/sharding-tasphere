@@ -50,20 +50,10 @@ public class AggregationProjection implements Projection {
     
     private final DatabaseType databaseType;
     
-    private final String separator;
-    
     private final List<AggregationProjection> derivedAggregationProjections = new ArrayList<>(2);
     
     @Setter
     private int index = -1;
-    
-    public AggregationProjection(final AggregationType type, final String expression, final IdentifierValue alias, final DatabaseType databaseType) {
-        this.type = type;
-        this.expression = expression;
-        this.alias = alias;
-        this.databaseType = databaseType;
-        this.separator = null;
-    }
     
     @Override
     public String getColumnName() {
@@ -81,9 +71,5 @@ public class AggregationProjection implements Projection {
     @Override
     public final Optional<IdentifierValue> getAlias() {
         return Optional.ofNullable(alias);
-    }
-    
-    public Optional<String> getSeparator() {
-        return Optional.ofNullable(separator);
     }
 }

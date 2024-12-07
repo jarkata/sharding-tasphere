@@ -42,8 +42,12 @@ class PostgreSQLSetVariableAdminExecutorTest {
     
     @Test
     void assertExecute() {
+        VariableAssignSegment variableAssignSegment = new VariableAssignSegment();
+        VariableSegment variable = new VariableSegment(0, 0, "key");
+        variableAssignSegment.setVariable(variable);
+        variableAssignSegment.setAssignValue("value");
         PostgreSQLSetStatement setStatement = new PostgreSQLSetStatement();
-        setStatement.getVariableAssigns().add(new VariableAssignSegment(0, 0, new VariableSegment(0, 0, "key"), "value"));
+        setStatement.getVariableAssigns().add(variableAssignSegment);
         PostgreSQLSetVariableAdminExecutor executor = new PostgreSQLSetVariableAdminExecutor(setStatement);
         ConnectionSession connectionSession = mock(ConnectionSession.class);
         RequiredSessionVariableRecorder requiredSessionVariableRecorder = mock(RequiredSessionVariableRecorder.class);

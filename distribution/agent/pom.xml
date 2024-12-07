@@ -21,16 +21,11 @@
     <parent>
         <groupId>org.apache.shardingsphere</groupId>
         <artifactId>shardingsphere-distribution</artifactId>
-        <version>5.5.2-SNAPSHOT</version>
+        <version>5.5.1</version>
     </parent>
     <artifactId>shardingsphere-agent-distribution</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    
-    <properties>
-        <agent.image.repository>ghcr.io/apache/shardingsphere-agent</agent.image.repository>
-        <agent.image.tag>${project.version}</agent.image.tag>
-    </properties>
     
     <dependencies>
         <dependency>
@@ -125,14 +120,12 @@
                                     <arguments>
                                         <argument>build</argument>
                                         <argument>--build-arg</argument>
-                                        <argument>DIRECTORY_NAME=apache-shardingsphere-${project.version}-shardingsphere-agent-bin</argument>
-                                        <argument>--build-arg</argument>
-                                        <argument>JAR_NAME=shardingsphere-agent-${project.version}.jar</argument>
+                                        <argument>APP_NAME=apache-shardingsphere-${project.version}-shardingsphere-agent-bin</argument>
                                         <argument>.</argument>
                                         <argument>-t</argument>
-                                        <argument>${agent.image.repository}:${agent.image.tag}</argument>
+                                        <argument>apache/shardingsphere-agent:${project.version}</argument>
                                         <argument>-t</argument>
-                                        <argument>${agent.image.repository}:latest</argument>
+                                        <argument>apache/shardingsphere-agent:latest</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -143,6 +136,10 @@
         </profile>
         <profile>
             <id>docker.buildx.push</id>
+            <properties>
+                <agent.image.repository>apache/shardingsphere-agent</agent.image.repository>
+                <agent.image.tag>${project.version}</agent.image.tag>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -187,9 +184,7 @@
                                         <argument>--platform</argument>
                                         <argument>linux/amd64,linux/arm64</argument>
                                         <argument>--build-arg</argument>
-                                        <argument>DIRECTORY_NAME=apache-shardingsphere-${project.version}-shardingsphere-agent-bin</argument>
-                                        <argument>--build-arg</argument>
-                                        <argument>JAR_NAME=shardingsphere-agent-${project.version}.jar</argument>
+                                        <argument>APP_NAME=apache-shardingsphere-${project.version}-shardingsphere-agent-bin</argument>
                                         <argument>.</argument>
                                         <argument>-t</argument>
                                         <argument>${agent.image.repository}:${agent.image.tag}</argument>

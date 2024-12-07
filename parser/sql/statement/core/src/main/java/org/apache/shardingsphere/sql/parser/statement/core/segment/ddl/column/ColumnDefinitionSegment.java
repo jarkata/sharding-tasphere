@@ -50,8 +50,6 @@ public final class ColumnDefinitionSegment implements CreateDefinitionSegment {
     
     private final boolean notNull;
     
-    private final String text;
-    
     private final Collection<SimpleTableSegment> referencedTables = new LinkedList<>();
     
     @Setter

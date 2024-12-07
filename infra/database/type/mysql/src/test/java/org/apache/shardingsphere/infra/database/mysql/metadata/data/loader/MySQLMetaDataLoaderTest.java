@@ -23,7 +23,6 @@ import org.apache.shardingsphere.infra.database.core.metadata.data.model.ColumnM
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.IndexMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.SchemaMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.TableMetaData;
-import org.apache.shardingsphere.infra.database.core.metadata.database.datatype.DataTypeRegistry;
 import org.apache.shardingsphere.infra.database.core.spi.DatabaseTypedSPILoader;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.database.mysql.type.MySQLDatabaseType;
@@ -58,7 +57,6 @@ class MySQLMetaDataLoaderTest {
         ResultSet indexResultSet = mockIndexMetaDataResultSet();
         when(dataSource.getConnection().prepareStatement("SELECT TABLE_NAME, INDEX_NAME, NON_UNIQUE, COLUMN_NAME FROM information_schema.statistics "
                 + "WHERE TABLE_SCHEMA=? and TABLE_NAME IN ('tbl') ORDER BY NON_UNIQUE, INDEX_NAME, SEQ_IN_INDEX").executeQuery()).thenReturn(indexResultSet);
-        DataTypeRegistry.load(dataSource, "MySQL");
         assertTableMetaDataMap(dialectMetaDataLoader.load(new MetaDataLoaderMaterial(Collections.emptyList(), "foo_ds", dataSource, new MySQLDatabaseType(), "sharding_db")));
     }
     
@@ -73,7 +71,6 @@ class MySQLMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement("SELECT TABLE_NAME, INDEX_NAME, NON_UNIQUE, COLUMN_NAME FROM information_schema.statistics WHERE TABLE_SCHEMA=? and TABLE_NAME IN ('tbl') "
                 + "ORDER BY NON_UNIQUE, INDEX_NAME, SEQ_IN_INDEX")
                 .executeQuery()).thenReturn(indexResultSet);
-        DataTypeRegistry.load(dataSource, "MySQL");
         assertTableMetaDataMap(dialectMetaDataLoader.load(new MetaDataLoaderMaterial(Collections.singletonList("tbl"), "foo_ds", dataSource, new MySQLDatabaseType(), "sharding_db")));
     }
     
@@ -132,7 +129,8 @@ class MySQLMetaDataLoaderTest {
         assertThat(columnsIterator.next(), is(new ColumnMetaData("mpt", Types.BINARY, false, false, false, true, false, true)));
         assertThat(actualTableMetaData.getIndexes().size(), is(1));
         Iterator<IndexMetaData> indexesIterator = actualTableMetaData.getIndexes().iterator();
-        IndexMetaData expected = new IndexMetaData("id", Collections.singletonList("id"));
+        IndexMetaData expected = new IndexMetaData("id");
+        expected.getColumns().add("id");
         expected.setUnique(true);
         assertThat(indexesIterator.next(), is(expected));
     }

@@ -29,10 +29,6 @@ import org.apache.shardingsphere.sql.parser.autogen.ClickHouseStatementParser.In
 import org.apache.shardingsphere.sql.parser.autogen.ClickHouseStatementParser.SelectClauseContext;
 import org.apache.shardingsphere.sql.parser.autogen.ClickHouseStatementParser.SubqueryContext;
 import org.apache.shardingsphere.sql.parser.clickhouse.visitor.statement.ClickHouseStatementVisitor;
-import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseDeleteStatement;
-import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseInsertStatement;
-import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseSelectStatement;
-import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseUpdateStatement;
 import org.apache.shardingsphere.sql.parser.statement.core.enums.JoinType;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.assignment.ColumnAssignmentSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.assignment.InsertValuesSegment;
@@ -43,6 +39,7 @@ import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.Bina
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.ExpressionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.FunctionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.complex.CommonExpressionSegment;
+import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.simple.LiteralExpressionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.simple.ParameterMarkerExpressionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.subquery.SubqueryExpressionSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.expr.subquery.SubquerySegment;
@@ -67,6 +64,10 @@ import org.apache.shardingsphere.sql.parser.statement.core.segment.generic.table
 import org.apache.shardingsphere.sql.parser.statement.core.value.collection.CollectionValue;
 import org.apache.shardingsphere.sql.parser.statement.core.value.identifier.IdentifierValue;
 import org.apache.shardingsphere.sql.parser.statement.core.value.literal.impl.BooleanLiteralValue;
+import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseDeleteStatement;
+import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseInsertStatement;
+import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseSelectStatement;
+import org.apache.shardingsphere.sql.parser.statement.clickhouse.dml.ClickHouseUpdateStatement;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -323,9 +324,9 @@ public final class ClickHouseDMLStatementVisitor extends ClickHouseStatementVisi
             result.setAlias(alias);
             return projection;
         }
-        ExpressionSegment column = (ExpressionSegment) projection;
-        ExpressionProjectionSegment result = null == alias ? new ExpressionProjectionSegment(column.getStartIndex(), column.getStopIndex(), column.getText(), column)
-                : new ExpressionProjectionSegment(column.getStartIndex(), ctx.alias().stop.getStopIndex(), String.valueOf(column.getText()), column);
+        LiteralExpressionSegment column = (LiteralExpressionSegment) projection;
+        ExpressionProjectionSegment result = null == alias ? new ExpressionProjectionSegment(column.getStartIndex(), column.getStopIndex(), String.valueOf(column.getLiterals()), column)
+                : new ExpressionProjectionSegment(column.getStartIndex(), ctx.alias().stop.getStopIndex(), String.valueOf(column.getLiterals()), column);
         result.setAlias(alias);
         return result;
     }

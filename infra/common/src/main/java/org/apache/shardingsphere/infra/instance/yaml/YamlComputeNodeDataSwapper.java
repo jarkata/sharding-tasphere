@@ -30,12 +30,11 @@ public final class YamlComputeNodeDataSwapper implements YamlConfigurationSwappe
         YamlComputeNodeData result = new YamlComputeNodeData();
         result.setAttribute(data.getAttribute());
         result.setVersion(data.getVersion());
-        result.setDatabaseName(data.getDatabaseName());
         return result;
     }
     
     @Override
     public ComputeNodeData swapToObject(final YamlComputeNodeData yamlConfig) {
-        return new ComputeNodeData(yamlConfig.getAttribute(), yamlConfig.getVersion(), yamlConfig.getDatabaseName());
+        return new ComputeNodeData(yamlConfig.getAttribute(), yamlConfig.getVersion());
     }
 }

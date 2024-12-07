@@ -22,6 +22,7 @@ import org.apache.shardingsphere.distsql.handler.validate.DistSQLDataSourcePoolP
 import org.apache.shardingsphere.distsql.statement.ral.updatable.ImportDatabaseConfigurationStatement;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
 import org.apache.shardingsphere.infra.config.props.ConfigurationPropertyKey;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.exception.dialect.exception.syntax.database.DatabaseCreateExistsException;
 import org.apache.shardingsphere.infra.exception.kernel.metadata.MissingRequiredDatabaseException;
@@ -29,6 +30,7 @@ import org.apache.shardingsphere.infra.exception.kernel.metadata.rule.DuplicateR
 import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.infra.metadata.database.resource.ResourceMetaData;
 import org.apache.shardingsphere.infra.metadata.database.resource.unit.StorageUnit;
+import org.apache.shardingsphere.infra.metadata.database.schema.model.ShardingSphereSchema;
 import org.apache.shardingsphere.infra.rule.attribute.datasource.DataSourceMapperRuleAttribute;
 import org.apache.shardingsphere.infra.spi.exception.ServiceProviderNotFoundException;
 import org.apache.shardingsphere.infra.spi.type.typed.TypedSPILoader;
@@ -139,17 +141,18 @@ class ImportDatabaseConfigurationExecutorTest {
     private ContextManager mockContextManager(final String databaseName) {
         ContextManager result = mock(ContextManager.class, RETURNS_DEEP_STUBS);
         ShardingSphereDatabase database = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
-        when(database.getName()).thenReturn(databaseName);
         ResourceMetaData resourceMetaData = mock(ResourceMetaData.class);
         when(database.getResourceMetaData()).thenReturn(resourceMetaData);
         when(database.getProtocolType()).thenReturn(TypedSPILoader.getService(DatabaseType.class, "FIXTURE"));
+        ShardingSphereSchema schema = mock(ShardingSphereSchema.class);
+        when(database.getSchema(DefaultDatabase.LOGIC_NAME)).thenReturn(schema);
         StorageUnit storageUnit = mock(StorageUnit.class);
         DataSource dataSource = new MockedDataSource();
         when(storageUnit.getDataSource()).thenReturn(dataSource);
         when(database.getResourceMetaData().getStorageUnits()).thenReturn(new HashMap<>(Collections.singletonMap("foo_ds", storageUnit)));
         when(database.getResourceMetaData().getDataSourceMap()).thenReturn(Collections.singletonMap("foo_ds", dataSource));
         when(database.getRuleMetaData().getAttributes(DataSourceMapperRuleAttribute.class)).thenReturn(Collections.emptyList());
-        when(result.getMetaDataContexts().getMetaData().getAllDatabases()).thenReturn(Collections.singleton(database));
+        when(result.getMetaDataContexts().getMetaData().getDatabases()).thenReturn(Collections.singletonMap(databaseName, database));
         when(result.getMetaDataContexts().getMetaData().getDatabase(databaseName)).thenReturn(database);
         when(result.getMetaDataContexts().getMetaData().getProps()).thenReturn(new ConfigurationProperties(createProperties()));
         return result;

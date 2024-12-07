@@ -79,8 +79,6 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SelectInformationSchemataExecutorTest {
     
-    private final DatabaseType databaseType = TypedSPILoader.getService(DatabaseType.class, "MySQL");
-    
     private final Grantee grantee = new Grantee("root", "127.0.0.1");
     
     private final String sql = "SELECT SCHEMA_NAME, DEFAULT_COLLATION_NAME FROM information_schema.SCHEMATA";
@@ -94,7 +92,7 @@ class SelectInformationSchemataExecutorTest {
     void setUp() {
         when(connectionSession.getConnectionContext().getGrantee()).thenReturn(grantee);
         statement = (SelectStatement) new SQLParserRule(
-                new DefaultSQLParserRuleConfigurationBuilder().build()).getSQLParserEngine(databaseType).parse(sql, false);
+                new DefaultSQLParserRuleConfigurationBuilder().build()).getSQLParserEngine(TypedSPILoader.getService(DatabaseType.class, "MySQL")).parse(sql, false);
     }
     
     @Test
@@ -166,8 +164,8 @@ class SelectInformationSchemataExecutorTest {
         when(shardingSphereDataPersistService.load(any())).thenReturn(Optional.empty());
         when(metaDataPersistService.getShardingSphereDataPersistService()).thenReturn(shardingSphereDataPersistService);
         MetaDataContexts metaDataContexts = MetaDataContextsFactory.create(metaDataPersistService, new ShardingSphereMetaData(
-                Arrays.stream(databases).collect(Collectors.toList()), mock(ResourceMetaData.class), new RuleMetaData(Collections.singleton(authorityRule)),
-                new ConfigurationProperties(new Properties())));
+                Arrays.stream(databases).collect(Collectors.toMap(ShardingSphereDatabase::getName, each -> each)),
+                mock(ResourceMetaData.class), new RuleMetaData(Collections.singleton(authorityRule)), new ConfigurationProperties(new Properties())));
         when(result.getMetaDataContexts()).thenReturn(metaDataContexts);
         for (ShardingSphereDatabase each : databases) {
             when(result.getDatabase(each.getName())).thenReturn(each);
@@ -176,7 +174,7 @@ class SelectInformationSchemataExecutorTest {
     }
     
     private ShardingSphereDatabase createDatabase(final String databaseName, final ResourceMetaData resourceMetaData) {
-        return new ShardingSphereDatabase(databaseName, databaseType, resourceMetaData, mock(RuleMetaData.class), Collections.emptyList());
+        return new ShardingSphereDatabase(databaseName, TypedSPILoader.getService(DatabaseType.class, "MySQL"), resourceMetaData, mock(RuleMetaData.class), Collections.emptyMap());
     }
     
     private ShardingSphereDatabase createDatabase(final String databaseName) {

@@ -21,6 +21,7 @@ import org.apache.shardingsphere.authority.rule.AuthorityRule;
 import org.apache.shardingsphere.authority.rule.builder.DefaultAuthorityRuleConfigurationBuilder;
 import org.apache.shardingsphere.authority.rule.builder.DefaultUser;
 import org.apache.shardingsphere.infra.config.props.ConfigurationProperties;
+import org.apache.shardingsphere.infra.database.core.DefaultDatabase;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.exception.generic.UnsupportedSQLOperationException;
 import org.apache.shardingsphere.infra.hint.HintValueContext;
@@ -106,7 +107,7 @@ class ProxyBackendHandlerFactoryTest {
     
     private ConnectionContext mockConnectionContext() {
         ConnectionContext result = mock(ConnectionContext.class);
-        when(result.getCurrentDatabaseName()).thenReturn(Optional.of("foo_db"));
+        when(result.getCurrentDatabaseName()).thenReturn(Optional.of(DefaultDatabase.LOGIC_NAME));
         when(result.getGrantee()).thenReturn(new Grantee(DefaultUser.USERNAME, "%"));
         when(result.getTransactionContext()).thenReturn(mock(TransactionConnectionContext.class));
         return result;
@@ -122,7 +123,7 @@ class ProxyBackendHandlerFactoryTest {
         RuleMetaData globalRuleMetaData = new RuleMetaData(Arrays.asList(
                 new AuthorityRule(new DefaultAuthorityRuleConfigurationBuilder().build()),
                 new SQLParserRule(new DefaultSQLParserRuleConfigurationBuilder().build()),
-                new TransactionRule(new DefaultTransactionRuleConfigurationBuilder().build(), Collections.emptyList())));
+                new TransactionRule(new DefaultTransactionRuleConfigurationBuilder().build(), Collections.emptyMap())));
         when(metaDataContexts.getMetaData().getGlobalRuleMetaData()).thenReturn(globalRuleMetaData);
         return result;
     }
@@ -130,7 +131,7 @@ class ProxyBackendHandlerFactoryTest {
     private ShardingSphereDatabase mockDatabase() {
         ShardingSphereDatabase result = mock(ShardingSphereDatabase.class, RETURNS_DEEP_STUBS);
         when(result.getRuleMetaData().getRules()).thenReturn(Collections.emptyList());
-        when(result.getSchema("foo_db").getAllColumnNames("t_order")).thenReturn(Collections.singletonList("order_id"));
+        when(result.getSchema(DefaultDatabase.LOGIC_NAME).getAllColumnNames("t_order")).thenReturn(Collections.singletonList("order_id"));
         return result;
     }
     

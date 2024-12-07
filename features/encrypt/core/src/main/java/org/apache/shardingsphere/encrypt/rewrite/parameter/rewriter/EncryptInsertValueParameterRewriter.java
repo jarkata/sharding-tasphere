@@ -18,6 +18,8 @@
 package org.apache.shardingsphere.encrypt.rewrite.parameter.rewriter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.apache.shardingsphere.encrypt.rewrite.aware.DatabaseNameAware;
 import org.apache.shardingsphere.encrypt.rule.EncryptRule;
 import org.apache.shardingsphere.encrypt.rule.column.EncryptColumn;
 import org.apache.shardingsphere.encrypt.rule.table.EncryptTable;
@@ -42,11 +44,12 @@ import java.util.Optional;
  * Insert value parameter rewriter for encrypt.
  */
 @RequiredArgsConstructor
-public final class EncryptInsertValueParameterRewriter implements ParameterRewriter {
+@Setter
+public final class EncryptInsertValueParameterRewriter implements ParameterRewriter, DatabaseNameAware {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
-    private final String databaseName;
+    private String databaseName;
     
     @Override
     public boolean isNeedRewrite(final SQLStatementContext sqlStatementContext) {
@@ -58,7 +61,7 @@ public final class EncryptInsertValueParameterRewriter implements ParameterRewri
     public void rewrite(final ParameterBuilder paramBuilder, final SQLStatementContext sqlStatementContext, final List<Object> params) {
         InsertStatementContext insertStatementContext = (InsertStatementContext) sqlStatementContext;
         String tableName = insertStatementContext.getSqlStatement().getTable().map(optional -> optional.getTableName().getIdentifier().getValue()).orElse("");
-        Optional<EncryptTable> encryptTable = rule.findEncryptTable(tableName);
+        Optional<EncryptTable> encryptTable = encryptRule.findEncryptTable(tableName);
         if (!encryptTable.isPresent()) {
             return;
         }
@@ -67,7 +70,7 @@ public final class EncryptInsertValueParameterRewriter implements ParameterRewri
                 .orElseGet(() -> new DatabaseTypeRegistry(insertStatementContext.getDatabaseType()).getDefaultSchemaName(databaseName));
         while (descendingColumnNames.hasNext()) {
             String columnName = descendingColumnNames.next();
-            if (rule.findEncryptTable(tableName).map(optional -> optional.isEncryptColumn(columnName)).orElse(false)) {
+            if (encryptRule.findEncryptTable(tableName).map(optional -> optional.isEncryptColumn(columnName)).orElse(false)) {
                 encryptInsertValues((GroupedParameterBuilder) paramBuilder, insertStatementContext, schemaName, tableName, columnName);
             }
         }
@@ -75,7 +78,7 @@ public final class EncryptInsertValueParameterRewriter implements ParameterRewri
     
     private void encryptInsertValues(final GroupedParameterBuilder paramBuilder, final InsertStatementContext insertStatementContext,
                                      final String schemaName, final String tableName, final String columnName) {
-        EncryptColumn encryptColumn = rule.getEncryptTable(tableName).getEncryptColumn(columnName);
+        EncryptColumn encryptColumn = encryptRule.getEncryptTable(tableName).getEncryptColumn(columnName);
         int columnIndex = getColumnIndex(paramBuilder, insertStatementContext, columnName);
         int count = 0;
         for (List<Object> each : insertStatementContext.getGroupedParameters()) {

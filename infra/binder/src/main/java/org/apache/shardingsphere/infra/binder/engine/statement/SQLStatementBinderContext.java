@@ -17,10 +17,7 @@
 
 package org.apache.shardingsphere.infra.binder.engine.statement;
 
-import com.cedarsoftware.util.CaseInsensitiveMap.CaseInsensitiveString;
-import com.cedarsoftware.util.CaseInsensitiveSet;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
+import com.cedarsoftware.util.CaseInsensitiveMap;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.shardingsphere.infra.binder.engine.segment.from.context.TableSegmentBinderContext;
@@ -30,7 +27,9 @@ import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.item.Proj
 import org.apache.shardingsphere.sql.parser.statement.core.statement.SQLStatement;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * SQL statement binder context.
@@ -47,18 +46,18 @@ public final class SQLStatementBinderContext {
     
     private final Collection<String> variableNames;
     
-    private final Collection<String> usingColumnNames = new CaseInsensitiveSet<>();
+    private final Collection<String> usingColumnNames = new HashSet<>();
     
     private final Collection<ProjectionSegment> joinTableProjectionSegments = new LinkedList<>();
     
-    private final Multimap<CaseInsensitiveString, TableSegmentBinderContext> externalTableBinderContexts = LinkedHashMultimap.create();
+    private final Map<String, TableSegmentBinderContext> externalTableBinderContexts = new CaseInsensitiveMap<>();
     
-    private final Collection<String> pivotColumnNames = new CaseInsensitiveSet<>();
+    private final Collection<String> pivotColumnNames = new HashSet<>();
     
     public SQLStatementBinderContext(final SQLStatement sqlStatement, final ShardingSphereMetaData metaData, final String currentDatabaseName) {
         this.metaData = metaData;
         this.currentDatabaseName = currentDatabaseName;
         databaseType = sqlStatement.getDatabaseType();
-        variableNames = new CaseInsensitiveSet<>(sqlStatement.getVariableNames());
+        variableNames = sqlStatement.getVariableNames();
     }
 }

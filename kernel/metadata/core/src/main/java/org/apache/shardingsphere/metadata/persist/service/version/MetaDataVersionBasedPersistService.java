@@ -20,7 +20,6 @@ package org.apache.shardingsphere.metadata.persist.service.version;
 import org.apache.shardingsphere.infra.metadata.version.MetaDataVersion;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Meta data version based registry service.
@@ -50,12 +49,4 @@ public interface MetaDataVersionBasedPersistService {
      * @return version path
      */
     String getVersionPathByActiveVersion(String path, String activeVersion);
-    
-    /**
-     * Get versions.
-     *
-     * @param path path
-     * @return versions
-     */
-    List<String> getVersions(String path);
 }

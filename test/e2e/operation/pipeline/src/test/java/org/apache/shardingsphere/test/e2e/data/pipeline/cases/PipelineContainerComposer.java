@@ -61,7 +61,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -393,7 +392,7 @@ public final class PipelineContainerComposer implements AutoCloseable {
                 connection.createStatement().execute(each);
             }
         }
-        Awaitility.await().timeout(Duration.ofMinutes(1L)).pollDelay(Math.max(sleepSeconds, 0L), TimeUnit.SECONDS).until(() -> true);
+        Awaitility.await().pollDelay(Math.max(sleepSeconds, 0L), TimeUnit.SECONDS).until(() -> true);
     }
     
     /**

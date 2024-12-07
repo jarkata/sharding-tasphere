@@ -19,7 +19,6 @@ package org.apache.shardingsphere.sql.parser.statement.core.statement.dml;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.shardingsphere.sql.parser.statement.core.enums.SubqueryType;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.combine.CombineSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.item.ProjectionsSegment;
 import org.apache.shardingsphere.sql.parser.statement.core.segment.dml.order.GroupBySegment;
@@ -58,8 +57,6 @@ public abstract class SelectStatement extends AbstractSQLStatement implements DM
     private CombineSegment combine;
     
     private WithSegment withSegment;
-    
-    private SubqueryType subqueryType;
     
     /**
      * Get from.
@@ -122,15 +119,6 @@ public abstract class SelectStatement extends AbstractSQLStatement implements DM
      */
     public Optional<WithSegment> getWithSegment() {
         return Optional.ofNullable(withSegment);
-    }
-    
-    /**
-     * Get subquery type.
-     *
-     * @return subquery type
-     */
-    public Optional<SubqueryType> getSubqueryType() {
-        return Optional.ofNullable(subqueryType);
     }
     
     /**

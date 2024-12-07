@@ -18,6 +18,7 @@
 package org.apache.shardingsphere.proxy.backend.handler.database;
 
 import org.apache.shardingsphere.infra.exception.dialect.exception.syntax.database.DatabaseCreateExistsException;
+import org.apache.shardingsphere.infra.metadata.database.ShardingSphereDatabase;
 import org.apache.shardingsphere.mode.manager.ContextManager;
 import org.apache.shardingsphere.mode.metadata.MetaDataContexts;
 import org.apache.shardingsphere.proxy.backend.context.ProxyContext;
@@ -83,7 +84,7 @@ class CreateDatabaseBackendHandlerTest {
     private ContextManager mockContextManager() {
         ContextManager result = mock(ContextManager.class, RETURNS_DEEP_STUBS);
         MetaDataContexts metaDataContexts = mock(MetaDataContexts.class, RETURNS_DEEP_STUBS);
-        when(metaDataContexts.getMetaData().getAllDatabases()).thenReturn(Collections.singleton(mock()));
+        when(metaDataContexts.getMetaData().getDatabases()).thenReturn(Collections.singletonMap("foo_db", mock(ShardingSphereDatabase.class)));
         when(result.getMetaDataContexts()).thenReturn(metaDataContexts);
         return result;
     }

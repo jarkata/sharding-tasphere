@@ -79,12 +79,12 @@ public final class ExportStorageNodesExecutor implements DistSQLQueryExecutor<Ex
     
     private Map<String, Collection<ExportedStorageNode>> getAllStorageNodes(final ShardingSphereMetaData metaData) {
         Map<String, Collection<ExportedStorageNode>> storageNodes = new LinkedHashMap<>();
-        for (ShardingSphereDatabase each : metaData.getAllDatabases()) {
+        metaData.getDatabases().values().forEach(each -> {
             if (each.getResourceMetaData().getAllInstanceDataSourceNames().isEmpty()) {
-                continue;
+                return;
             }
             storageNodes.putAll(generateDatabaseExportStorageNodesData(each));
-        }
+        });
         return storageNodes;
     }
     

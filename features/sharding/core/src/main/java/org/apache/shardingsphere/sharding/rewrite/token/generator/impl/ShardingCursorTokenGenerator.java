@@ -18,7 +18,6 @@
 package org.apache.shardingsphere.sharding.rewrite.token.generator.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.type.CursorAvailable;
 import org.apache.shardingsphere.infra.rewrite.sql.token.common.generator.OptionalSQLTokenGenerator;
@@ -31,11 +30,10 @@ import org.apache.shardingsphere.sql.parser.statement.core.segment.ddl.cursor.Cu
 /**
  * Sharding cursor token generator.
  */
-@HighFrequencyInvocation
 @RequiredArgsConstructor
 public final class ShardingCursorTokenGenerator implements OptionalSQLTokenGenerator<SQLStatementContext> {
     
-    private final ShardingRule rule;
+    private final ShardingRule shardingRule;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -44,7 +42,7 @@ public final class ShardingCursorTokenGenerator implements OptionalSQLTokenGener
     
     @Override
     public SQLToken generateSQLToken(final SQLStatementContext sqlStatementContext) {
-        CursorNameSegment cursorNameSegment = ((CursorAvailable) sqlStatementContext).getCursorName().orElseThrow(CursorNameNotFoundException::new);
-        return new CursorToken(cursorNameSegment.getStartIndex(), cursorNameSegment.getStopIndex(), cursorNameSegment.getIdentifier(), sqlStatementContext, rule);
+        CursorNameSegment cursorName = ((CursorAvailable) sqlStatementContext).getCursorName().orElseThrow(CursorNameNotFoundException::new);
+        return new CursorToken(cursorName.getStartIndex(), cursorName.getStopIndex(), cursorName.getIdentifier(), sqlStatementContext, shardingRule);
     }
 }

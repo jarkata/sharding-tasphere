@@ -19,7 +19,6 @@ package org.apache.shardingsphere.sharding.rewrite.token.generator.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.apache.shardingsphere.infra.annotation.HighFrequencyInvocation;
 import org.apache.shardingsphere.infra.binder.context.aware.CursorAware;
 import org.apache.shardingsphere.infra.binder.context.statement.SQLStatementContext;
 import org.apache.shardingsphere.infra.binder.context.type.TableAvailable;
@@ -39,12 +38,11 @@ import java.util.LinkedList;
 /**
  * Sharding table token generator.
  */
-@HighFrequencyInvocation
 @RequiredArgsConstructor
 @Setter
 public final class ShardingTableTokenGenerator implements CollectionSQLTokenGenerator<SQLStatementContext>, RouteContextAware {
     
-    private final ShardingRule rule;
+    private final ShardingRule shardingRule;
     
     private RouteContext routeContext;
     
@@ -55,9 +53,9 @@ public final class ShardingTableTokenGenerator implements CollectionSQLTokenGene
     
     private boolean isAllBindingTables(final SQLStatementContext sqlStatementContext) {
         Collection<String> shardingLogicTableNames = sqlStatementContext instanceof TableAvailable
-                ? rule.getShardingLogicTableNames(((TableAvailable) sqlStatementContext).getTablesContext().getTableNames())
+                ? shardingRule.getShardingLogicTableNames(((TableAvailable) sqlStatementContext).getTablesContext().getTableNames())
                 : Collections.emptyList();
-        return shardingLogicTableNames.size() > 1 && rule.isAllBindingTables(shardingLogicTableNames);
+        return shardingLogicTableNames.size() > 1 && shardingRule.isAllBindingTables(shardingLogicTableNames);
     }
     
     @Override
@@ -68,10 +66,9 @@ public final class ShardingTableTokenGenerator implements CollectionSQLTokenGene
     private Collection<SQLToken> generateSQLTokens(final TableAvailable sqlStatementContext) {
         Collection<SQLToken> result = new LinkedList<>();
         for (SimpleTableSegment each : sqlStatementContext.getTablesContext().getSimpleTables()) {
-            TableNameSegment tableNameSegment = each.getTableName();
-            if (rule.findShardingTable(tableNameSegment.getIdentifier().getValue()).isPresent()) {
-                result.add(
-                        new ShardingTableToken(tableNameSegment.getStartIndex(), tableNameSegment.getStopIndex(), tableNameSegment.getIdentifier(), (SQLStatementContext) sqlStatementContext, rule));
+            TableNameSegment tableName = each.getTableName();
+            if (shardingRule.findShardingTable(tableName.getIdentifier().getValue()).isPresent()) {
+                result.add(new ShardingTableToken(tableName.getStartIndex(), tableName.getStopIndex(), tableName.getIdentifier(), (SQLStatementContext) sqlStatementContext, shardingRule));
             }
         }
         return result;

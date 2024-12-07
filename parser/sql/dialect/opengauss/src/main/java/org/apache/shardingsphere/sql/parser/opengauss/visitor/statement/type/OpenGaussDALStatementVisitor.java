@@ -91,18 +91,17 @@ public final class OpenGaussDALStatementVisitor extends OpenGaussStatementVisito
     
     @Override
     public ASTNode visitConfigurationParameterClause(final ConfigurationParameterClauseContext ctx) {
-        return new VariableAssignSegment(ctx.start.getStartIndex(), ctx.stop.getStopIndex(),
-                new VariableSegment(ctx.varName().start.getStartIndex(), ctx.varName().stop.getStopIndex(), ctx.varName().getText()), getAssignValue(ctx));
-    }
-    
-    private String getAssignValue(final ConfigurationParameterClauseContext ctx) {
+        VariableAssignSegment result = new VariableAssignSegment();
+        result.setStartIndex(ctx.start.getStartIndex());
+        result.setStopIndex(ctx.stop.getStopIndex());
+        result.setVariable(new VariableSegment(ctx.varName().start.getStartIndex(), ctx.varName().stop.getStopIndex(), ctx.varName().getText()));
         if (null != ctx.varList()) {
-            return ctx.varList().getText();
+            result.setAssignValue(ctx.varList().getText());
         }
         if (null != ctx.DEFAULT()) {
-            return ctx.DEFAULT().getText();
+            result.setAssignValue(ctx.DEFAULT().getText());
         }
-        return null;
+        return result;
     }
     
     @Override

@@ -58,7 +58,7 @@ import java.util.Optional;
 @Setter
 public final class EncryptAlterTableTokenGenerator implements CollectionSQLTokenGenerator<AlterTableStatementContext> {
     
-    private final EncryptRule rule;
+    private final EncryptRule encryptRule;
     
     @Override
     public boolean isGenerateSQLToken(final SQLStatementContext sqlStatementContext) {
@@ -68,7 +68,7 @@ public final class EncryptAlterTableTokenGenerator implements CollectionSQLToken
     @Override
     public Collection<SQLToken> generateSQLTokens(final AlterTableStatementContext sqlStatementContext) {
         String tableName = sqlStatementContext.getSqlStatement().getTable().getTableName().getIdentifier().getValue();
-        EncryptTable encryptTable = rule.getEncryptTable(tableName);
+        EncryptTable encryptTable = encryptRule.getEncryptTable(tableName);
         Collection<SQLToken> result = new LinkedList<>(getAddColumnTokens(encryptTable, sqlStatementContext.getSqlStatement().getAddColumnDefinitions()));
         result.addAll(getModifyColumnTokens(encryptTable, sqlStatementContext.getSqlStatement().getModifyColumnDefinitions()));
         result.addAll(getChangeColumnTokens(encryptTable, sqlStatementContext.getSqlStatement().getChangeColumnDefinitions()));
@@ -243,7 +243,7 @@ public final class EncryptAlterTableTokenGenerator implements CollectionSQLToken
         for (int i = 0; i < dropSQLTokens.size(); i++) {
             SQLToken token = dropSQLTokens.get(i);
             if (token instanceof RemoveToken) {
-                result.add(0 == i ? token : new RemoveToken(lastStartIndex, token.getStopIndex()));
+                result.add(0 == i ? token : new RemoveToken(lastStartIndex, ((RemoveToken) token).getStopIndex()));
             } else {
                 EncryptAlterTableToken encryptAlterTableToken = (EncryptAlterTableToken) token;
                 dropColumns.add(encryptAlterTableToken.getColumnName());

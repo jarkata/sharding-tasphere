@@ -123,14 +123,21 @@ public final class GenericSchemaBuilder {
         }
         Map<String, ShardingSphereSchema> result = new ConcurrentHashMap<>(schemaMetaDataMap.size(), 1F);
         for (Entry<String, SchemaMetaData> entry : schemaMetaDataMap.entrySet()) {
-            result.put(entry.getKey().toLowerCase(), new ShardingSphereSchema(entry.getKey(), convertToTables(entry.getValue().getTables()), new LinkedList<>()));
+            Map<String, ShardingSphereTable> tables = convertToTableMap(entry.getValue().getTables());
+            result.put(entry.getKey().toLowerCase(), new ShardingSphereSchema(entry.getKey(), tables, new LinkedHashMap<>()));
         }
         return result;
     }
     
-    private static Collection<ShardingSphereTable> convertToTables(final Collection<TableMetaData> tableMetaDataList) {
-        return tableMetaDataList.stream().map(each -> new ShardingSphereTable(
-                each.getName(), convertToColumns(each.getColumns()), convertToIndexes(each.getIndexes()), convertToConstraints(each.getConstraints()), each.getType())).collect(Collectors.toList());
+    private static Map<String, ShardingSphereTable> convertToTableMap(final Collection<TableMetaData> tableMetaDataList) {
+        Map<String, ShardingSphereTable> result = new LinkedHashMap<>(tableMetaDataList.size(), 1F);
+        for (TableMetaData each : tableMetaDataList) {
+            Collection<ShardingSphereColumn> columns = convertToColumns(each.getColumns());
+            Collection<ShardingSphereIndex> indexes = convertToIndexes(each.getIndexes());
+            Collection<ShardingSphereConstraint> constraints = convertToConstraints(each.getConstraints());
+            result.put(each.getName(), new ShardingSphereTable(each.getName(), columns, indexes, constraints, each.getType()));
+        }
+        return result;
     }
     
     private static Collection<ShardingSphereColumn> convertToColumns(final Collection<ColumnMetaData> columnMetaDataList) {
@@ -145,7 +152,9 @@ public final class GenericSchemaBuilder {
     private static Collection<ShardingSphereIndex> convertToIndexes(final Collection<IndexMetaData> indexMetaDataList) {
         Collection<ShardingSphereIndex> result = new LinkedList<>();
         for (IndexMetaData each : indexMetaDataList) {
-            ShardingSphereIndex index = new ShardingSphereIndex(each.getName(), each.getColumns(), each.isUnique());
+            ShardingSphereIndex index = new ShardingSphereIndex(each.getName());
+            index.getColumns().addAll(each.getColumns());
+            index.setUnique(each.isUnique());
             result.add(index);
         }
         return result;

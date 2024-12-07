@@ -36,7 +36,6 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -78,13 +77,13 @@ public final class SystemSchemaBuilder {
     
     private static ShardingSphereSchema createSchema(final String schemaName, final Collection<InputStream> schemaStreams, final YamlTableSwapper swapper,
                                                      final boolean isSystemSchemaMetadataEnabled) {
-        Collection<ShardingSphereTable> tables = new LinkedList<>();
+        Map<String, ShardingSphereTable> tables = new LinkedHashMap<>(schemaStreams.size(), 1F);
         for (InputStream each : schemaStreams) {
             YamlShardingSphereTable metaData = new Yaml().loadAs(each, YamlShardingSphereTable.class);
             if (isSystemSchemaMetadataEnabled || KernelSupportedSystemTables.isSupportedSystemTable(schemaName, metaData.getName())) {
-                tables.add(swapper.swapToObject(metaData));
+                tables.put(metaData.getName(), swapper.swapToObject(metaData));
             }
         }
-        return new ShardingSphereSchema(schemaName, tables, Collections.emptyList());
+        return new ShardingSphereSchema(schemaName, tables, Collections.emptyMap());
     }
 }

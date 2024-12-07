@@ -23,7 +23,6 @@ import org.apache.shardingsphere.infra.database.core.metadata.data.model.ColumnM
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.IndexMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.SchemaMetaData;
 import org.apache.shardingsphere.infra.database.core.metadata.data.model.TableMetaData;
-import org.apache.shardingsphere.infra.database.core.metadata.database.datatype.DataTypeRegistry;
 import org.apache.shardingsphere.infra.database.core.spi.DatabaseTypedSPILoader;
 import org.apache.shardingsphere.infra.database.core.type.DatabaseType;
 import org.apache.shardingsphere.infra.database.oracle.type.OracleDatabaseType;
@@ -89,7 +88,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITHOUT_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(12);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(2);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -110,7 +108,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITHOUT_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(12);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(1);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -131,7 +128,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITHOUT_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(11);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(2);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -153,7 +149,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITH_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(12);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(2);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -175,7 +170,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITH_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(12);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(1);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -197,7 +191,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITH_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(11);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(2);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
@@ -219,7 +212,6 @@ class OracleMetaDataLoaderTest {
         when(dataSource.getConnection().prepareStatement(ALL_CONSTRAINTS_SQL_WITH_TABLES).executeQuery()).thenReturn(primaryKeys);
         when(dataSource.getConnection().getMetaData().getDatabaseMajorVersion()).thenReturn(12);
         when(dataSource.getConnection().getMetaData().getDatabaseMinorVersion()).thenReturn(2);
-        DataTypeRegistry.load(dataSource, "Oracle");
         Collection<SchemaMetaData> actual = getDialectTableMetaDataLoader().load(
                 new MetaDataLoaderMaterial(Collections.singleton("tbl"), "foo_ds", dataSource, new OracleDatabaseType(), "sharding_db"));
         assertTableMetaDataMap(actual);
