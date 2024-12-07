@@ -49,7 +49,11 @@
 </table>
 
 ### 概述
-
+<hr>
+基于ShardingSphere构建，主要目的如下:
+* 1-学习源代码
+* 2-按照自己的使用场景精简代码
+* 3-按照自己的习惯及场景补充新的功能
 <hr>
 
 Apache ShardingSphere 产品定位为 `Database Plus`，旨在构建异构数据库上层的标准和生态。

@@ -50,30 +50,41 @@
 
 ### OVERVIEW
 
+<hr>
+
 基于ShardingSphere构建，主要目的如下:
+
 * 1-学习源代码
 * 2-按照自己的使用场景精简代码
 * 3-按照自己的习惯及场景补充新的功能
 
-
 <hr>
 
-Apache ShardingSphere is a distributed SQL transaction & query engine that allows for data sharding, scaling, encryption, and more - on any database. Our community's guiding development concept is Database Plus for creating a complete ecosystem that allows you to transform any database into a distributed database system. 
+Apache ShardingSphere is a distributed SQL transaction & query engine that allows for data sharding, scaling,
+encryption, and more - on any database. Our community's guiding development concept is Database Plus for creating a
+complete ecosystem that allows you to transform any database into a distributed database system.
 
-It focuses on repurposing existing databases, by placing a standardized upper layer above existing and fragmented databases, rather than creating a new database. 
+It focuses on repurposing existing databases, by placing a standardized upper layer above existing and fragmented
+databases, rather than creating a new database.
 
-The goal is to provide unified database services and minimize or eliminate the challenges caused by underlying databases' fragmentation. 
+The goal is to provide unified database services and minimize or eliminate the challenges caused by underlying
+databases' fragmentation.
 This results in applications only needing to communicate with a single standardized service.
 
 The concepts at the core of the project are `Connect`, `Enhance` and `Pluggable`.
 
-- `Connect:` Flexible adaptation of database protocol, SQL dialect and database storage. It can quickly connect applications and heterogeneous databases.
-- `Enhance:` Capture database access entry to provide additional features transparently, such as: redirect (sharding, readwrite-splitting and shadow), transform (data encrypt and mask), authentication (security, audit and authority), governance (circuit breaker and access limitation and analyze, QoS and observability).
-- `Pluggable:` Leveraging the micro kernel and 3 layers pluggable mode, features and database ecosystem can be embedded flexibly. Developers can customize their ShardingSphere just like building with LEGO blocks.
+- `Connect:` Flexible adaptation of database protocol, SQL dialect and database storage. It can quickly connect
+  applications and heterogeneous databases.
+- `Enhance:` Capture database access entry to provide additional features transparently, such as: redirect (sharding,
+  readwrite-splitting and shadow), transform (data encrypt and mask), authentication (security, audit and authority),
+  governance (circuit breaker and access limitation and analyze, QoS and observability).
+- `Pluggable:` Leveraging the micro kernel and 3 layers pluggable mode, features and database ecosystem can be embedded
+  flexibly. Developers can customize their ShardingSphere just like building with LEGO blocks.
 
 ShardingSphere became an [Apache](https://apache.org/index.html#projects-list) Top-Level Project on April 16, 2020.
 
-So far, ShardingSphere has been used by over [15,000 projects on GitHub](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code).
+So far, ShardingSphere has been used by
+over [15,000 projects on GitHub](https://github.com/search?l=Maven+POM&q=shardingsphere+language%3A%22Maven+POM%22&type=Code).
 
 ### DOCUMENTATION📜
 
@@ -88,13 +99,15 @@ For full documentation & more details, visit: [Docs](https://shardingsphere.apac
 
 <hr>
 
-For guides on how to get started and setup your environment, contributor & committer guides, visit: [Contribution Guidelines](https://shardingsphere.apache.org/community/en/involved/)
+For guides on how to get started and setup your environment, contributor & committer guides,
+visit: [Contribution Guidelines](https://shardingsphere.apache.org/community/en/involved/)
 
 ### Team
 
 <hr>
 
-We deeply appreciate [community contributors](https://shardingsphere.apache.org/community/en/team) for their dedication to Apache ShardingSphere.
+We deeply appreciate [community contributors](https://shardingsphere.apache.org/community/en/team) for their dedication
+to Apache ShardingSphere.
 
 ##
 
@@ -102,17 +115,22 @@ We deeply appreciate [community contributors](https://shardingsphere.apache.org/
 
 <hr>
 
-:link: [Mailing List](https://shardingsphere.apache.org/community/en/involved/subscribe/). Best for: Apache community updates, releases, changes.
+:link: [Mailing List](https://shardingsphere.apache.org/community/en/involved/subscribe/). Best for: Apache community
+updates, releases, changes.
 
-:link: [GitHub Issues](https://github.com/apache/shardingsphere/issues). Best for: larger systemic questions/bug reports or anything development related.
+:link: [GitHub Issues](https://github.com/apache/shardingsphere/issues). Best for: larger systemic questions/bug reports
+or anything development related.
 
-:link: [GitHub Discussions](https://github.com/apache/shardingsphere/discussions). Best for: technical questions & support, requesting new features, proposing new features.
+:link: [GitHub Discussions](https://github.com/apache/shardingsphere/discussions). Best for: technical questions &
+support, requesting new features, proposing new features.
 
-:link: [Slack channel](https://join.slack.com/t/apacheshardingsphere/shared_invite/zt-sbdde7ie-SjDqo9~I4rYcR18bq0SYTg). Best for: instant communications and online meetings, sharing your applications.
+:link: [Slack channel](https://join.slack.com/t/apacheshardingsphere/shared_invite/zt-sbdde7ie-SjDqo9~I4rYcR18bq0SYTg).
+Best for: instant communications and online meetings, sharing your applications.
 
 :link: [Twitter](https://twitter.com/ShardingSphere). Best for: keeping up to date on everything ShardingSphere.
 
-:link: [LinkedIn](https://www.linkedin.com/showcase/apache-shardingsphere/e). Best for: professional networking and career development with other ShardingSphere contributors.
+:link: [LinkedIn](https://www.linkedin.com/showcase/apache-shardingsphere/e). Best for: professional networking and
+career development with other ShardingSphere contributors.
 
 ##
 
@@ -122,12 +140,14 @@ We deeply appreciate [community contributors](https://shardingsphere.apache.org/
 
 :white_check_mark: Version 5.5.1: released :tada:
 
-🔗 For the release notes, follow this link to the relevant [GitHub page](https://github.com/apache/shardingsphere/blob/master/RELEASE-NOTES.md).
+🔗 For the release notes, follow this link to the
+relevant [GitHub page](https://github.com/apache/shardingsphere/blob/master/RELEASE-NOTES.md).
 
 :soon: Version 5.5.2
 
 We are currently working towards our 5.5.2 milestone.
-Keep an eye on the [milestones page](https://github.com/apache/shardingsphere/milestones) of this repo to stay up to date.
+Keep an eye on the [milestones page](https://github.com/apache/shardingsphere/milestones) of this repo to stay up to
+date.
 
 [comment]: <> (##)
 
@@ -158,7 +178,8 @@ Keep an eye on the [milestones page](https://github.com/apache/shardingsphere/mi
 <hr>
 
 Apache ShardingSphere includes 2 independent products: JDBC & Proxy.
-They all provide functions of data scale-out, distributed transaction and distributed governance, applicable in a variety of situations such as Java-based isomorphism, heterogeneous language and Cloud-Native.
+They all provide functions of data scale-out, distributed transaction and distributed governance, applicable in a
+variety of situations such as Java-based isomorphism, heterogeneous language and Cloud-Native.
 
 ### ShardingSphere-JDBC
 
@@ -166,10 +187,12 @@ They all provide functions of data scale-out, distributed transaction and distri
 
 [![Maven Status](https://img.shields.io/maven-central/v/org.apache.shardingsphere/shardingsphere-jdbc.svg?color=green)](https://mvnrepository.com/artifact/org.apache.shardingsphere/shardingsphere-jdbc)
 
-A lightweight Java framework providing extra services at the Java JDBC layer. 
-With the client end connecting directly to the database, it provides services in the form of a jar and requires no extra deployment and dependence.
+A lightweight Java framework providing extra services at the Java JDBC layer.
+With the client end connecting directly to the database, it provides services in the form of a jar and requires no extra
+deployment and dependence.
 
-:link: For more details, follow this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#shardingsphere-jdbc).
+:link: For more details, follow
+this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#shardingsphere-jdbc).
 
 ### ShardingSphere-Proxy
 
@@ -179,21 +202,27 @@ With the client end connecting directly to the database, it provides services in
 [![Download](https://img.shields.io/badge/release-download-orange.svg)](https://www.apache.org/dyn/closer.lua/shardingsphere/5.3.2/apache-shardingsphere-5.3.2-shardingsphere-proxy-bin.tar.gz)
 [![Docker Pulls](https://img.shields.io/docker/pulls/apache/shardingsphere-proxy.svg)](https://store.docker.com/community/images/apache/shardingsphere-proxy)
 
-A transparent database proxy, providing a database server that encapsulates the database binary protocol to support heterogeneous languages. 
+A transparent database proxy, providing a database server that encapsulates the database binary protocol to support
+heterogeneous languages.
 Friendlier to DBAs, the MariaDB, MySQL and PostgreSQL version now provided can use any kind of terminal.
 
-:link: For more details, follow this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#shardingsphere-proxy).
+:link: For more details, follow
+this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#shardingsphere-proxy).
 
 ### Hybrid Architecture
 
 <hr>
 
-ShardingSphere-JDBC adopts a decentralized architecture, applicable to high-performance light-weight OLTP applications developed with Java. 
-ShardingSphere-Proxy provides static entry and all languages support, suitable for an OLAP application and sharding databases management and operation.
+ShardingSphere-JDBC adopts a decentralized architecture, applicable to high-performance light-weight OLTP applications
+developed with Java.
+ShardingSphere-Proxy provides static entry and all languages support, suitable for an OLAP application and sharding
+databases management and operation.
 
-Through the combination of ShardingSphere-JDBC & ShardingSphere-Proxy together with a unified sharding strategy by the same registry center, the ShardingSphere ecosystem can build an application system suitable to all kinds of scenarios.
+Through the combination of ShardingSphere-JDBC & ShardingSphere-Proxy together with a unified sharding strategy by the
+same registry center, the ShardingSphere ecosystem can build an application system suitable to all kinds of scenarios.
 
-:link: More details can be found following this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#hybrid-architecture).
+:link: More details can be found following
+this [link to the official website](https://shardingsphere.apache.org/document/current/en/overview/#hybrid-architecture).
 
 ##
 
@@ -223,7 +252,8 @@ Through the combination of ShardingSphere-JDBC & ShardingSphere-Proxy together w
 
 <hr>
 
-Check out [Wiki](https://github.com/apache/shardingsphere/wiki) section for details on how to build Apache ShardingSphere and a full guide on how to get started and setup your local dev environment.
+Check out [Wiki](https://github.com/apache/shardingsphere/wiki) section for details on how to build Apache
+ShardingSphere and a full guide on how to get started and setup your local dev environment.
 
 ##
 
